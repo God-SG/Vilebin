@@ -1,0 +1,1128 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        body {
+            background-color: #000;
+        }
+        
+        .main-container {
+            margin-left: 260px;
+            padding: 20px 20px 0 15px;
+            color: #fff;
+            font-size: 13px;
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                margin-left: 0;
+                padding-top: 75px;
+            }
+        }
+        
+        .user-info {
+            background: #0C0C0C;
+            border: 1px solid #333;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .verified-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #39ff14;
+        }
+
+        .verified-status .icon {
+            width: 16px;
+            height: 16px;
+            background: #39ff14;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #fff;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-label {
+            color: #bababa;
+            font-weight: bold;
+            min-width: 85px;
+        }
+
+        .info-value {
+            color: #fff;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background: #222;
+        }
+
+        .danger-button {
+            background: #3d0f0f;
+        }
+
+        .danger-button:hover {
+            background: #4d1515;
+        }
+
+        .success-button {
+            background: #0f3d0f;
+        }
+
+        .success-button:hover {
+            background: #154d15;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin: 20px 0 10px;
+            color: #bababa;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 12px;
+        }
+
+        .mini-table th,
+        .mini-table td {
+            border: 1px solid #333;
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        .mini-table th {
+            background: #1a1a1a;
+            font-weight: bold;
+            color: #bababa;
+        }
+
+        .mini-table td {
+            color: #fff;
+        }
+
+        .mini-table tr:nth-child(even) {
+            background: #0C0C0C;
+        }
+
+        .mini-table .action-button {
+            padding: 1px 4px;
+            font-size: 11px;
+            line-height: 1;
+        }
+
+        select {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 4px;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        select:focus {
+            outline: none;
+        }
+
+        .profile-link {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .profile-link:hover {
+            text-decoration: underline;
+        }
+
+        .rank-admin {
+            color: #ff0000;
+            font-weight: bold;
+            background-image: url('/static/red.gif');
+            padding: 2px 4px;
+            border-radius: 2px;
+            background-color: #3D0606;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+        }
+        .modal-content {
+            background: #0C0C0C;
+            margin: 15% auto;
+            padding: 20px;
+            width: 70%;
+            max-width: 500px;
+            color: #fff;
+        }
+
+        .modal input {
+            background: #1c1c1c;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 5px;
+            margin: 10px 0;
+            outline: none;
+        }
+        .modal input:focus {
+            outline: none;
+        }
+        .modal button {
+            background: #1c1c1c;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .verify-type-selector {
+            display: flex;
+            gap: 10px;
+        }
+        .verify-type-selector button {
+            padding: 5px 15px;
+            background: #1c1c1c;
+            border: 1px solid #333;
+            color: #888;
+            cursor: pointer;
+        }
+        .verify-type-selector button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .verify-type-selector button.active-type {
+            background: #282828;
+            border-color: #333;
+            color: #fff;
+        }
+        .totp-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'admin/navbar.html' %}
+
+    <main class="main-container">
+        <div class="user-info">
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">User ID:</span>
+                    <span class="info-value"><a href="/user/{{ user.username }}" class="profile-link">{{ user.id }}</a></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Username:</span>
+                    <span class="info-value">
+                        <a href="javascript:void(0);" onclick="{% if status in ['admin', 'founder', 'manager'] %}showUsernameModal(){% else %}javascript:void(0);{% endif %}" class="profile-link" style="color: {{ user.color }};">{{ user.username }}</a>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Created:</span>
+                    <span class="info-value">{{ user.datejoin }}</span>
+                </div>
+                <span class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">
+                        <a href="javascript:void(0);" class="profile-link"
+                        {% if status in ['admin', 'founder', 'manager'] %}onclick="showEmailModal()"{% else %}javascript:void(0);{% endif %}>
+                            
+                            {% if user.email %}
+                                <span>{{ user.email }}</span>
+
+                            {% elif canSeeEmail %}
+                                <span style="color:#ff0000;">[Not Found]</span>
+
+                            {% else %}
+                                <span style="color:#ff0000;">[Hidden]</span>
+                            {% endif %}
+
+                        </a>
+                    </span>
+                </span>
+                <div class="info-item">
+                    <span class="info-label">Rank:</span>
+                    <span class="info-value">
+                        <a class="profile-link" href="javascript:void(0);" onclick="showRankModal()">
+                            {% set s = styles[user.status] %}
+                            {% if s %}
+                                <span style="{{ s.rankStyle }} padding: 2px 4px; border-radius: 2px; {% if s.backgroundColor %}background-color: {{ s.backgroundColor }};{% endif %}">
+                                    {{ user.status | capitalize if user.status != 'user' else 'Default' }}
+                                </span>
+                            {% else %}
+                                <span style="color: #bababa; padding: 2px 4px; border-radius: 2px; background-color: #2A2A2A;">Default</span>
+                            {% endif %}
+                        </a>
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Seen:</span>
+                    <span class="info-value">{{ user.lastseen }}</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                {% if user.ban %}
+                    <button class="action-button success-button" onclick="updateLock('unlock')">Unlock Account</button>
+                {% else %}
+                    <button class="action-button danger-button" onclick="showLockModal()">Lock Account</button>
+                {% endif %}
+                <button class="action-button danger-button" onclick="showDeleteModal()">Delete Account</button>
+                
+                {% if status in ['admin', 'founder', 'manager'] %}
+                <button class="action-button" onclick="resetPassword()">Reset Password</button>
+                {% endif %}
+
+                {% if status in ['admin', 'founder', 'manager'] %}
+                    {% if user.totp_enabled %}
+                        <button class="action-button danger-button" onclick="showDisableTOTPModal()">Disable TOTP</button>
+                    {% endif %}
+                {% endif %}
+                {#<button class="action-button success-button" onclick="showVerifyModal()">Verify</button> #}
+            </div>
+        </div>
+
+        <div class="section-title"><strong>Username History</strong></div>
+        <table class="mini-table">
+            <tbody>
+                {% for h in username_history %}
+                <tr>
+                    <td>{{ h.username }}{% if h.note %} <span style="color: red;">({{ h.note }})</span>{% endif %}</td>
+                    <td>{{ h.date }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        
+        <div class="section-title"><strong>Active Sessions</strong></div>
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th><strong>Session ID</strong></th>
+                    <th><strong>First Seen</strong></th>
+                    <th><strong>Last Seen</strong></th>
+                    <th><strong>Authenticated</strong></th>
+                    <th><strong>Action</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in sessions %}
+                <tr {% if s.active == 'False' %}style="display: none;"{% endif %}>
+                    <td>{{ sessions | length - loop.index0 }}</td>
+                    <td>{{ s.first_seen }}</td>
+                    <td>{{ s.last_seen }}</td>
+                    <td style="color: {% if s.active == 'True' %}#00ff00{% else %}#ff0000{% endif %}">{{ s.active }}</td>
+                    <td>    
+                        <button class="action-button danger-button" onclick="fetch(`/api/terminateSession?sessionID={{ sessions | length - loop.index0 }}&userID={{ user.id }}`).then(r=>r.json()).then(data=>{if(data.success)location.reload()})">Terminate</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        
+        <div class="section-title"><strong>Audit Log</strong></div>
+        <table class="mini-table">
+            <thead>
+                <tr>
+                    <th><strong>Type</strong></th>
+                    <th><strong>Data</strong></th>
+                    <th><strong>Date</strong></th>
+                    <th><strong>Staff</strong></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in audit_log %}
+                <tr>
+                    <td>{{ a.type }}</td>
+                    <td>
+                        {% if (a.type == 'Set Rank' or a.type == 'Upgrade Rank') and a.data %}
+                            {% set sf = styles[a.data.from] or styles['user'] %}
+                            {% set st = styles[a.data.to] or styles['user'] %}
+                            <span style="{{ sf.rankStyle }} padding: 2px 4px; border-radius: 2px; {% if sf.backgroundColor %}background-color: {{ sf.backgroundColor }};{% endif %} margin-right: 4px;">
+                                {{ 'Default' if a.data.from == 'user' or a.data.from == 'default' else a.data.from | capitalize }}
+                            </span>
+                            to
+                            <span style="{{ st.rankStyle }} padding: 2px 4px; border-radius: 2px; {% if st.backgroundColor %}background-color: {{ st.backgroundColor }};{% endif %} margin-left: 4px;">
+                                {{ 'Default' if a.data.to == 'user' or a.data.to == 'default' else a.data.to | capitalize }}
+                            </span>
+                        {% elif (a.type == 'Change Username' or a.type == 'Force Change Username') and a.data %}
+                            {{ a.data.from }} → {{ a.data.to }}
+                        {% else %}
+                            {{ a.data }}
+                        {% endif %}
+                    </td>
+                    <td>{{ a.date }}</td>
+                    <td>
+                        {% if a.staff_username %}
+                            {% set ss = styles[a.staff_status] or styles['user'] %}
+                            <a class="profile-link" href="/user/{{ a.staff_username }}" style="{{ ss.rankStyle }}">
+                                {{ a.staff_username }} {{ ss.suffix }}
+                            </a>
+                        {% else %}
+                            <span style="color: #888;">Unknown</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+
+    <div id="verifyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Verify Account</h3>
+            </div>
+            <div class="modal-body">
+                
+                <div class="verify-type-selector" style="margin-bottom: 15px;">
+                    
+                    <button onclick="switchVerifyType(&#39;prompt&#39;)" id="promptBtn" class="active-type">Prompt</button>
+                    
+                    
+                    <button onclick="switchVerifyType(&#39;email&#39;)" id="emailBtn">Email</button>
+                    
+                    
+                    <button onclick="switchVerifyType(&#39;totp&#39;)" id="totpBtn">TOTP</button>
+                    
+                </div>
+                <div id="emailVerify" style="display: none;">
+                    <p>A verification code will be sent to <span id="maskedEmail">**@mojang.org</span></p>
+                    <div id="errorMessage" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+                    <div id="codeInput" style="display: none;">
+                        <input type="text" id="verificationCode" placeholder="Enter code">
+                        <button onclick="verifyCode(&#39;email&#39;)">Verify</button>
+                    </div>
+                    <button id="sendCodeBtn" onclick="sendCode()">Send Code</button>
+                </div>
+                <div id="totpVerify" style="display: none;">
+                    <p>Enter the code from the user's authenticator app</p>
+                    <div id="totpErrorMessage" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+                    <div id="totpCodeInput">
+                        <input type="text" id="totpCode" placeholder="Enter code">
+                        <button onclick="verifyCode(&#39;totp&#39;)">Verify</button>
+                    </div>
+                </div>
+                <div id="promptVerify">
+                    <div id="promptInitial">
+                        <p>Send a verification prompt to the user</p>
+                        <div id="promptErrorMessage" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+                        <button id="sendPromptBtn" onclick="sendVerificationPrompt()" class="action-button">Send Prompt</button>
+                    </div>
+                    <div id="promptWaiting" style="display: none; text-align: center;">
+                        <div style="width: 30px; height: 30px; border: 3px solid #333; border-top: 3px solid #fff; border-radius: 50%; animation: spin 1s linear infinite; margin: 10px auto;"></div>
+                        <p>Waiting for user response...</p>
+                    </div>
+                    <div id="promptSuccess" style="display: none; text-align: center;">
+                        <h3 style="color: #39ff14; margin-bottom: 10px;">Verification approved!</h3>
+                        <p>The verification has been approved by the user.</p>
+                        <button onclick="window.location.reload()" class="action-button success-button" style="margin-top: 10px;">Continue</button>
+                    </div>
+                    <div id="promptDenied" style="display: none; text-align: center;">
+                        <h3 style="color: #ff0000; margin-bottom: 10px;">Verification denied!</h3>
+                        <p>The user denied the verification.</p>
+                        <button onclick="resetVerificationPrompt(); document.querySelector(&#39;.modal&#39;).style.display=&#39;none&#39;" class="action-button" style="margin-top: 10px;">Close</button>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <div id="lockModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                
+                <h3>Lock Account</h3>
+                
+            </div>
+            <div class="modal-body">
+                <input type="text" id="lockReason" placeholder="Reason (optional)" style="width: 100%; margin-bottom: 15px; outline: none;">
+                <div id="lockErrorMessage" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+				
+				<button onclick="updateLock(&#39;lock&#39;)" style="background: #3d0f0f; border: 1px solid #3d0f0f; color: #fff;" onmouseover="this.style.background=&#39;#4d1515&#39;" onmouseout="this.style.background=&#39;#3d0f0f&#39;">Lock Account</button>
+				
+            </div>
+        </div>
+    </div>
+
+    <div id="resetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Reset Password</h2>
+            </div>
+            <div class="modal-body">
+                <div id="resetStep1">
+                    <input type="text" id="resetReason" class="form-control" style="width:100%;outline:none;background:#1a1a1a;border:1px solid #333;color:#fff" placeholder="Reason">
+                    <div id="resetError" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+                    <div class="modal-footer">
+                        <button onclick="confirmReset()" class="action-button">Reset Password</button>
+                    </div>
+                </div>
+                <div id="resetStep2" style="display:none">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px">
+                        <input type="text" id="resetLink" readonly="" style="flex:1">
+                        <button onclick="copyResetLink()" class="btn btn-primary">Copy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rankModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modify Rank</h2>
+            </div>
+            <div class="modal-body">
+                <div id="rankError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="showRankOptions(&#39;set&#39;)" class="button">Set Rank</button>
+                    <button onclick="showRankOptions(&#39;upgrade&#39;)" class="button">Upgrade Rank</button>
+                    <button onclick="showRankOptions(&#39;package&#39;)" class="button">Grant Package</button>
+                </div>
+                <div id="rankOptions" style="display: none; margin-top: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 10px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="disableTOTPModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Disable TOTP</h3>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="totpReason" placeholder="Reason (optional)" style="width: 100%; margin-bottom: 15px; outline: none;">
+                <div id="disableTotpError" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+                <button onclick="disableTOTP()" style="background: #3d0f0f; border: 1px solid #3d0f0f; color: #fff;" onmouseover="this.style.background=&#39;#4d1515&#39;" onmouseout="this.style.background=&#39;#3d0f0f&#39;">Disable TOTP</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="usernameModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modify Username</h2>
+            </div>
+            <div class="verify-type-selector" style="margin: 15px 0;">
+                <button onclick="switchUsernameType(&#39;change&#39;)" id="changeUsernameBtn" class="active-type">Change</button>
+                <button onclick="switchUsernameType(&#39;force&#39;)" id="forceChangeBtn">Force</button>
+            </div>
+            <div id="usernameChangeContent">
+                <div style="margin-bottom: 15px;">
+                    <input type="text" id="newUsername" placeholder="New Username" style="width: 100%;">
+                </div>
+                <div id="changeUsernameError" style="color: #ff0000; font-size: 12px; margin-bottom: 15px; display: none;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="changeUsername(false)" class="action-button">Change</button>
+                </div>
+            </div>
+            <div id="forceChangeContent" style="display: none;">
+                <div style="margin-bottom: 15px;">
+                    <input type="text" id="forceNewUsername" placeholder="New Username" style="width: 100%;">
+                </div>
+                <div id="forceChangeUsernameError" style="color: #ff0000; font-size: 12px; margin-bottom: 15px; display: none;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="changeUsername(true)" class="action-button">Force Change</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Modify Email</h2>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input type="text" id="newEmail" placeholder="New Email" style="width: 100%;">
+                </div>
+                <div style="margin-bottom: 10px;">
+                    <input type="text" id="emailReason" placeholder="Reason (optional)" style="width: 100%;">
+                </div>
+                <div id="emailError" style="color: #ff0000; font-size: 12px; margin-bottom: 5px; display: none;"></div>
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="changeEmail()" class="action-button">Change Email</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                
+                <h3>Delete Account</h3>
+                
+            </div>
+            <div class="modal-body">
+                <input type="text" id="deleteReason" placeholder="Reason (optional)" style="width: 100%; margin-bottom: 15px; outline: none;">
+                <div id="deleteErrorMessage" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+                
+                <button onclick="updateDelete(&#39;delete&#39;)" style="background: #3d0f0f; border: 1px solid #3d0f0f; color: #fff;" onmouseover="this.style.background=&#39;#4d1515&#39;" onmouseout="this.style.background=&#39;#3d0f0f&#39;">Delete Account</button>
+                
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('verifyModal');
+        const lockModal = document.getElementById('lockModal');
+        const resetModal = document.getElementById('resetModal');
+        const rankModal = document.getElementById('rankModal');
+        const rankOptions = document.getElementById('rankOptions');
+        const usernameModal = document.getElementById('usernameModal');
+        const disableTOTPModal = document.getElementById('disableTOTPModal');
+        const emailModal = document.getElementById('emailModal');
+        const deleteModal = document.getElementById('deleteModal');
+        let currentVerifyType = 'email';
+        let currentVerificationID = null;
+
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('verifyModal')) {
+                document.getElementById('verifyModal').style.display = 'none';
+            } else if (event.target == document.getElementById('lockModal')) {
+                document.getElementById('lockModal').style.display = 'none';
+            } else if (event.target == document.getElementById('resetModal')) {
+                document.getElementById('resetModal').style.display = 'none';
+            } else if (event.target == document.getElementById('rankModal')) {
+                document.getElementById('rankModal').style.display = 'none';
+            } else if (event.target == document.getElementById('usernameModal')) {
+                document.getElementById('usernameModal').style.display = 'none';
+            } else if (event.target == document.getElementById('disableTOTPModal')) {
+                document.getElementById('disableTOTPModal').style.display = 'none';
+            } else if (event.target == document.getElementById('emailModal')) {
+                document.getElementById('emailModal').style.display = 'none';
+            } else if (event.target == document.getElementById('deleteModal')) {
+                document.getElementById('deleteModal').style.display = 'none';
+            }
+        }
+        
+        function showVerifyModal() {
+            if (!modal) return;
+            modal.style.display = 'block';
+            
+            switchVerifyType('prompt');
+            
+        }
+        
+        function switchVerifyType(type) {
+            currentVerifyType = type;
+            const emailVerify = document.getElementById('emailVerify');
+            const totpVerify = document.getElementById('totpVerify');
+            const promptVerify = document.getElementById('promptVerify');
+            const emailBtn = document.getElementById('emailBtn');
+            const totpBtn = document.getElementById('totpBtn');
+            const promptBtn = document.getElementById('promptBtn');
+            
+            if (emailVerify) emailVerify.style.display = type === 'email' ? 'block' : 'none';
+            if (totpVerify) totpVerify.style.display = type === 'totp' ? 'block' : 'none';
+            if (promptVerify) promptVerify.style.display = type === 'prompt' ? 'block' : 'none';
+            if (emailBtn) emailBtn.classList.toggle('active-type', type === 'email');
+            if (totpBtn) totpBtn.classList.toggle('active-type', type === 'totp');
+            if (promptBtn) promptBtn.classList.toggle('active-type', type === 'prompt');
+            
+            const errorMessage = document.getElementById('errorMessage');
+            const totpErrorMessage = document.getElementById('totpErrorMessage');
+            const verificationCode = document.getElementById('verificationCode');
+            const totpCode = document.getElementById('totpCode');
+            const codeInput = document.getElementById('codeInput');
+            const sendCodeBtn = document.getElementById('sendCodeBtn');
+            
+            if (errorMessage) errorMessage.style.display = 'none';
+            if (totpErrorMessage) totpErrorMessage.style.display = 'none';
+            if (verificationCode) verificationCode.value = '';
+            if (totpCode) totpCode.value = '';
+            
+            if (type === 'email') {
+                if (codeInput) codeInput.style.display = 'none';
+                if (sendCodeBtn) sendCodeBtn.style.display = 'block';
+            }
+        }
+        
+        function sendCode() {
+            const sendCodeBtn = document.getElementById('sendCodeBtn');
+            const codeInput = document.getElementById('codeInput');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            fetch('/api/verifyAccount?userID={{ user.id }}')
+                .then(r => r.json())
+                .then(data => {
+                    if(data.success) {
+                        if (sendCodeBtn) sendCodeBtn.style.display = 'none';
+                        if (codeInput) codeInput.style.display = 'block';
+                        if (errorMessage) errorMessage.style.display = 'none';
+                    } else if(data.error) {
+                        if (errorMessage) {
+                            errorMessage.textContent = data.error;
+                            errorMessage.style.display = 'block';
+                        }
+                    }
+                });
+        }
+        
+        function verifyCode(type) {
+            const verificationCode = document.getElementById('verificationCode');
+            const totpCode = document.getElementById('totpCode');
+            const errorMessage = document.getElementById('errorMessage');
+            const totpErrorMessage = document.getElementById('totpErrorMessage');
+            
+            const code = type === 'email' 
+                ? (verificationCode ? verificationCode.value : '')
+                : (totpCode ? totpCode.value : '');
+                
+            if (!code.trim()) {
+                const errorElement = type === 'email'
+                    ? errorMessage
+                    : totpErrorMessage;
+                if (errorElement) {
+                    errorElement.textContent = 'Invalid verification code!';
+                    errorElement.style.display = 'block';
+                }
+                return;
+            }
+                
+            const errorElement = type === 'email'
+                ? errorMessage
+                : totpErrorMessage;
+                
+            fetch(`/api/verifyAccount/${code}?userID={{ user.id }}&type=${type}`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    } else if(data.error && errorElement) {
+                        errorElement.textContent = data.error;
+                        errorElement.style.display = 'block';   
+                    }
+                });
+        }
+        
+        function showLockModal() {
+            document.getElementById('lockModal').style.display = 'block';
+            document.getElementById('lockErrorMessage').style.display = 'none';
+            document.getElementById('lockReason').value = '';
+        }
+        
+        function updateLock(type) {
+            const reason = document.getElementById('lockReason').value;
+            fetch(`/api/lockAccount?userID={{ user.id }}&type=${type}${reason ? '&reason=' + encodeURIComponent(reason) : ''}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else if(data.error) {
+                        const errorEl = document.getElementById('lockErrorMessage');
+                        errorEl.textContent = data.error;
+                        errorEl.style.display = 'block';
+                    }
+                });
+        }
+        
+        async function resetPassword() {
+            document.getElementById('resetStep1').style.display = 'block';
+            document.getElementById('resetStep2').style.display = 'none';
+            document.getElementById('resetReason').value = '';
+            document.getElementById('resetError').style.display = 'none';
+            document.getElementById('resetModal').style.display = 'block';
+        }
+        
+        async function confirmReset() {
+            const reason = document.getElementById('resetReason').value;
+            const response = await fetch(`/api/resetPassword?userID={{ user.id }}&reason=${encodeURIComponent(reason)}`);
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('resetLink').value = window.location.origin + data.reset_link;
+                document.getElementById('resetStep1').style.display = 'none';
+                document.getElementById('resetStep2').style.display = 'block';
+            } else {
+                const error = document.getElementById('resetError');
+                error.textContent = data.error || 'An error occurred';
+                error.style.display = 'block';
+            }
+        }
+        
+        function copyResetLink() {
+            const link = document.getElementById('resetLink');
+            link.select();
+            document.execCommand('copy');
+        }
+        
+        function showRankModal() {
+            rankModal.style.display = 'block';
+            rankOptions.style.display = 'none';
+        }
+        
+        function showRankOptions(type) {
+            const errorEl = document.getElementById('rankError');
+            errorEl.style.display = 'none';
+            const userRank = '{{ user.status | lower if user.status != 'user' else 'default' }}';
+            const staffRank = '{{ status }}';
+            const hasUsernameColor = {{ user.colorchanges }};
+            let options = '';
+            
+            if (type === 'set') {
+                const regularRanks = `<select id="rankSelect" class="input-field" style="width: 20%; margin: 0;">
+                                        <option value="default">Default</option>
+                                        <option value="vip">VIP</option>
+                                        <option value="criminal">Criminal</option>
+                                        <option value="rich">Rich</option>`;
+
+                const staffRankOptions = `<option value="clique">Clique</option>
+                                        <option value="founder">Founder</option>
+                                        <option value="council">Council</option>
+                                        <option value="mod">Mod</option>
+                                        <option value="manager">Manager</option>
+                                        <option value="admin">Admin</option>`;
+                                    
+                options = `<div style="display: flex; flex-direction: column; gap: 10px;">
+                            ${regularRanks}${staffRank !== 'mod' ? staffRankOptions : ''}</select>
+                            <button onclick="setSelectedRank()" class="button" style="width: 20%;">Set Rank</button>
+                          </div>`;
+            } else if (type === 'package') {
+                const buttonStyle = hasUsernameColor ? 
+                    'background: #3d0f0f; border: 1px solid #3d0f0f;' : 
+                    'background: #0f3d0f; border: 1px solid #0f3d0f;';
+                const buttonText = hasUsernameColor ? 'Remove Username Color' : 'Grant Username Color';
+                
+                options = `<div style="display: flex; flex-direction: column; gap: 10px;">
+                            <button onclick="grantPackage(${hasUsernameColor ? 0 : 1})" 
+                                    class="button" 
+                                    style="width: 60%; ${buttonStyle}">
+                                ${buttonText}
+                            </button>
+                          </div>`;
+            } else {
+                const hierarchy = {'none': 0, 'vip': 1, 'criminal': 2, 'rich': 3};
+                const currentLevel = hierarchy[userRank] || 0;
+                options = '<div style="display: flex; flex-direction: column; gap: 10px; width: 20%;">';
+                Object.entries(hierarchy).forEach(([rank, level]) => {
+                    if (level > currentLevel) {
+                        const displayRank = rank === 'vip' ? 'VIP' : rank.charAt(0).toUpperCase() + rank.slice(1);
+                        options += `<button onclick="upgradeRank('${rank}')" class="button">${displayRank}</button>`;
+                    }
+                });
+                options += '</div>';
+            }
+            
+            document.querySelector('#rankOptions > div').innerHTML = options;
+            document.getElementById('rankOptions').style.display = 'block';
+        }
+
+        function grantPackage(action) {
+            const errorEl = document.getElementById('rankError');
+            
+            fetch(`/api/grantPackage?userID={{ user.id }}&package=changeUsernameColor&action=${action}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        errorEl.textContent = data.error;
+                        errorEl.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    errorEl.textContent = 'An error occurred while processing your request.';
+                    errorEl.style.display = 'block';
+                });
+        }
+        
+        function setSelectedRank() {
+            const rank = document.getElementById('rankSelect').value;
+            setRank(rank);
+        }
+        
+        function setRank(rank) {
+            const errorEl = document.getElementById('rankError');
+            fetch(`/api/setRank?userID={{ user.id }}&rank=${rank}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else {
+                        errorEl.textContent = data.error;
+                        errorEl.style.display = 'block';
+                    }
+                });
+        }
+        
+        function upgradeRank(rank) {
+            const errorEl = document.getElementById('rankError');
+            fetch(`/api/upgradeRank?userID={{ user.id }}&rank=${rank}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else {
+                        errorEl.textContent = data.error;
+                        errorEl.style.display = 'block';
+                    }
+                });
+        }
+        
+        function showUsernameModal() {
+            document.getElementById('usernameModal').style.display = 'block';
+            document.getElementById('changeUsernameError').style.display = 'none';
+            document.getElementById('forceChangeUsernameError').style.display = 'none';
+            document.getElementById('newUsername').value = '';
+            document.getElementById('forceNewUsername').value = '';
+            switchUsernameType('change');
+        }
+
+        function switchUsernameType(type) {
+            const changeBtn = document.getElementById('changeUsernameBtn');
+            const forceBtn = document.getElementById('forceChangeBtn');
+            const changeContent = document.getElementById('usernameChangeContent');
+            const forceContent = document.getElementById('forceChangeContent');
+            
+            document.getElementById('changeUsernameError').style.display = 'none';
+            document.getElementById('forceChangeUsernameError').style.display = 'none';
+
+            if (type === 'change') {
+                changeBtn.classList.add('active-type');
+                forceBtn.classList.remove('active-type');
+                changeContent.style.display = 'block';
+                forceContent.style.display = 'none';
+            } else {
+                changeBtn.classList.remove('active-type');
+                forceBtn.classList.add('active-type');
+                changeContent.style.display = 'none';
+                forceContent.style.display = 'block';
+            }
+        }
+
+        function changeUsername(force) {
+            const username = force ? 
+                document.getElementById('forceNewUsername').value : 
+                document.getElementById('newUsername').value;
+            
+            const errorElement = force ? 
+                document.getElementById('forceChangeUsernameError') : 
+                document.getElementById('changeUsernameError');
+            
+            errorElement.style.display = 'none';
+
+            if (!username) {
+                errorElement.textContent = 'Please enter a username';
+                errorElement.style.display = 'block';
+                return;
+            }
+
+            const endpoint = force ? '/api/forceChangeUsername' : '/api/changeUsername';
+            fetch(`${endpoint}?userID={{ user.id }}&username=${encodeURIComponent(username)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = `/admin/users/${username}`;
+                    } else {
+                        errorElement.textContent = data.error || 'Failed to change username';
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    errorElement.textContent = 'An error occurred while changing the username';
+                    errorElement.style.display = 'block';
+                    console.error('Error:', error);
+                });
+        }
+
+        function showEmailModal() {
+            document.getElementById('emailModal').style.display = 'block';
+            document.getElementById('emailError').style.display = 'none';
+            document.getElementById('newEmail').value = '';
+            document.getElementById('emailReason').value = '';
+        }
+
+        function changeEmail() {
+            const errorEl = document.getElementById('emailError');
+            const newEmail = document.getElementById('newEmail').value.trim();
+            const reason = document.getElementById('emailReason').value.trim();
+            
+            if (!newEmail) {
+                errorEl.textContent = 'Please enter a new email address';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            fetch(`/api/changeEmail?userID={{ user.id }}&email=${encodeURIComponent(newEmail)}&reason=${encodeURIComponent(reason)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        errorEl.textContent = data.error;
+                        errorEl.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    errorEl.textContent = 'An error occurred while processing your request.';
+                    errorEl.style.display = 'block';
+                });
+        }
+
+        function showDisableTOTPModal() {
+            document.getElementById('disableTOTPModal').style.display = 'block';
+            document.getElementById('totpReason').value = '';
+            document.getElementById('disableTotpError').style.display = 'none';
+        }
+
+        function disableTOTP() {
+            const reason = document.getElementById('totpReason').value;
+            const errorElement = document.getElementById('disableTotpError');
+
+            fetch(`/api/disableAccountTOTP?userID={{ user.id }}&reason=${encodeURIComponent(reason)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        errorElement.textContent = data.error;
+                        errorElement.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    errorElement.textContent = 'An error occurred';
+                    errorElement.style.display = 'block';
+                });
+        }
+
+        function showDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'block';
+            document.getElementById('deleteErrorMessage').style.display = 'none';
+            document.getElementById('deleteReason').value = '';
+        }
+
+        function updateDelete(type) {
+            const reason = document.getElementById('deleteReason').value;
+            fetch(`/api/deleteAccount?userID={{ user.id }}&type=${type}${reason ? '&reason=' + encodeURIComponent(reason) : ''}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) location.reload();
+                    else if(data.error) {
+                        const errorEl = document.getElementById('deleteErrorMessage');
+                        errorEl.textContent = data.error;
+                        errorEl.style.display = 'block';
+                    }
+                });
+        }
+
+        function sendVerificationPrompt() {
+            const promptInitial = document.getElementById('promptInitial');
+            const promptWaiting = document.getElementById('promptWaiting');
+            const promptSuccess = document.getElementById('promptSuccess');
+            const promptDenied = document.getElementById('promptDenied');
+            const promptErrorMessage = document.getElementById('promptErrorMessage');
+            
+            promptInitial.style.display = 'none';
+            promptWaiting.style.display = 'block';
+            promptSuccess.style.display = 'none';
+            promptDenied.style.display = 'none';
+            promptErrorMessage.style.display = 'none';
+            
+            let verificationChecked = false;
+
+            socket.on('verified_prompt', function(data) {
+                if (data.verificationID !== currentVerificationID) return;
+                if (verificationChecked) return;
+                verificationChecked = true;
+
+                fetch(`/api/checkVerificationPrompt?verificationID=${data.verificationID}`)
+                    .then(response => response.json())
+                    .then(() => {
+                        promptWaiting.style.display = 'none';
+                        if (data.status === true) {
+                            promptSuccess.style.display = 'block';
+                        } else {
+                            promptDenied.style.display = 'block';
+                        }
+                        currentVerificationID = null;
+                    });
+            });
+            
+            fetch('/api/sendVerificationPrompt/99')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        promptWaiting.style.display = 'none';
+                        promptInitial.style.display = 'block';
+                        promptErrorMessage.textContent = data.error || 'Failed to send verification prompt';
+                        promptErrorMessage.style.display = 'block';
+                    } else {
+                        currentVerificationID = data.verificationID;
+                    }
+                });
+        }
+
+        function resetVerificationPrompt() {
+            const promptInitial = document.getElementById('promptInitial');
+            const promptWaiting = document.getElementById('promptWaiting');
+            const promptSuccess = document.getElementById('promptSuccess');
+            const promptDenied = document.getElementById('promptDenied');
+            const promptErrorMessage = document.getElementById('promptErrorMessage');
+            
+            promptInitial.style.display = 'block';
+            promptWaiting.style.display = 'none';
+            promptSuccess.style.display = 'none';
+            promptDenied.style.display = 'none';
+            promptErrorMessage.style.display = 'none';
+            currentVerificationID = null;
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

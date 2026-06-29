@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="data:,">
+    <title>{{ title }} | Vilebin</title>
+    <link rel="stylesheet" href="/static/nav.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="robots" content="noindex">
+</head>
+
+<body class="bin" style="margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;">
+    <style>
+        .paste-container {
+            display: flex;
+            flex: 1;
+        }
+        .content-area {
+            flex: 1;
+            background: #0C0C0C;
+            position: relative;
+            padding-bottom: 10px;
+			min-height: fit-content;
+        }
+        .content-area pre {
+            width: 100%;
+            height 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: monospace;
+            font-size: 13px;
+            padding: 10px 20px;
+            margin: 0;
+            margin-top: 10px;
+            white-space: pre;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            word-wrap: break-word;
+            overflow-y: auto;
+        }
+        .content-area pre a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .content-area pre a:hover {
+            text-decoration: underline;
+        }
+        .sidebar {
+            width: 280px;
+            background: #181818;
+            padding: 10px 12px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            transition: transform 0.3s ease;
+            text-align: center;
+            overflow-y: auto;
+        }
+        .sidebar.hidden {
+            transform: translateX(100%);
+        }
+        .toggle-sidebar {
+            position: fixed;
+            right: 304px;
+            top: 0;
+            background: #181818;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1000;
+            padding: 6px 10px;
+            border-radius: 0;
+            transition: right 0.3s ease;
+        }
+        .toggle-sidebar:hover {
+            background: #222;
+        }
+        .sidebar.hidden ~ .toggle-sidebar {
+            right: 0;
+        }
+        a {
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .ascii-art {
+            color: #fff;
+            font-family: monospace;
+            white-space: pre;
+            font-size: 14px;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .info-group {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .info-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 5px;
+            font-size: 13px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .info-group .value {
+            color: #bababa;
+            font-size: 13px;
+            text-align: right;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .button {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 3px;
+            margin-bottom: 1px;
+            transition: all 0.2s;
+        }
+        .button:hover {
+            background: #666;
+        }
+        .button.approve {
+            background: #557C51;
+        }
+        .button.approve:hover {
+            background: #3d5a3a;
+        }
+        .button.reject {
+            background: #753B3B;
+        }
+        .button.reject:hover {
+            background: #5d2f2f;
+        }
+        .separator {
+            border-top: 2px solid #747474;
+            margin: 15px 0;
+        }
+        *:focus {
+            outline: none !important;
+        }
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+        .system-reporter {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal[style*="display: block"],
+        .modal[style*="display: flex"] {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #111;
+            padding: 20px;
+            border: 1px solid #333;
+            position: relative;
+            color: #fff;
+            width: 500px;
+        }
+        .modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+        .modal-close:hover {
+            color: #fff;
+        }
+        select, textarea {
+            width: 100%;
+            background: #282828;
+            border: 0;
+            border-radius: 2px;
+            color: white;
+            padding: 7px 5px;
+            margin-bottom: 10px;
+            font-size: inherit;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 60px;
+            resize: none;
+        }
+    </style>
+
+    <div class="paste-container">
+        <div class="content-area">
+            <pre>{{ content }}</pre>
+        </div>
+        <button class="toggle-sidebar">☰</button>
+        <div class="sidebar">
+            
+            <a href="/" style="text-decoration: none;"><div class="ascii-art" style="text-decoration: none; font-size: 13px; line-height: 1.1;">__      ___ _      _     _       
+\ \    / (_) |    | |   (_)      
+ \ \  / / _| | ___| |__  _ _ __  
+  \ \/ / | | |/ _ \ '_ \| | '_ \ 
+   \  /  | | |  __/ |_) | | | | |
+    \/   |_|_|\___|_.__/|_|_| |_|</div></a>
+            <div style="margin-top: 0;">
+                <button class="button" style="background: {% if not activeMemo %}#753B3B{% else %}red{% endif %}; font-weight: bold; margin-bottom: 10px;" onclick="{% if not activeMemo %}showStaffMemoModal(){% else %}showViewStaffMemosModal(){% endif %};">{% if not activeMemo %}ADD STAFF NOTE{% else %}VIEW STAFF NOTES{% endif %}</span>
+            </div>
+
+            <div class="info-group">
+                <div class="info-row">
+                    <label>Title:</label>
+                    <span class="value">
+                        {% if is_pinned %}
+                        <i class="fas fa-thumbtack visibility-icon"></i>
+                        {% endif %}
+                        {{ title }}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <label>Created:</label>
+                    <span class="value">
+                        {{ formatted_date }}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <label>Author:</label>
+                    <span class="value">
+                        {% set s = styles.get(authorstatus, styles['user']) %}
+                        {% if authorstatus == 'anonymous' %}
+                            <span style="float: right;">
+                                {{ author }}
+                            </span>
+                        {% else %}
+                            <a href="/user/{{ author }}" style="float: right; {{ s.rankStyle }} text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                <span style="color: {{ authorcolor }};">{{ author }}</span>
+                                {% if s.suffix %} {{ s.suffix }}{% endif %}
+                            </a>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+			<div class="separator"></div>
+
+            <div style="height: 5px"></div>
+            <button class="button approve" onclick="showHideModal()">Approve</button>
+            <div style="height: 5px"></div>
+            <button class="button reject" onclick="reviewFlag(false)">Deny</button>
+            <div style="height: 5px"></div>
+    
+            <div class="separator"></div>
+            
+            <div class="info-group">
+                <div class="info-row">
+                    <label>Flagged By:</label>
+                    <div class="value">
+                        <a href="/user/{{ flag.reporter }}" style="color:#87cefa; font-weight:bold;">
+                            <span style="color: {{ flag.reportercolor }};">{{ flag.reporter }}</span> [Council]
+                        </a>
+                    </div>
+                </div>
+                <div class="info-row">
+                    <label>Flagged At:</label>
+                    <div class="value flag-date">{{ flag.dateFormatted }}</div>
+                </div>
+                <div class="info-row">
+                    <label>Reason:</label>
+                    <div class="value">{{ flag.reason }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="hideModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <span class="modal-close" onclick="closeHideModal()">&times;</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: #fff;">Seal Paste (Flag)</h2>
+            <div id="hideModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <select id="hide-dropdown" style="width: 100%; box-sizing: border-box;" onchange="updateReasonInput()">
+                    <option value="" selected></option>
+                    <option value="Insufficient info - Read TOS">Insufficient</option>
+                    <option value="Contains info on a minor under 15 - Read TOS">Underage</option>
+                    <option value="Spam - Read TOS">Spam / Irrelevant</option>
+                    <option value="Threats - Read TOS">Threats</option>
+                    <option value="Contains explicit imagery of a minor. Do not reupload.">CP</option>
+                    <option value="Contains a lack of information. Please provide more information.">Lack of effort</option>
+                    <option value="Bot Output">Bot Output</option>
+                </select>
+                <textarea id="hide-reason" placeholder="Reason" style="width: 100%; box-sizing: border-box;"></textarea>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="notifyUser" checked>
+                    <label for="notifyUser">Notify user</label>
+                </div>
+                <div style="margin-top: 15px;">
+                    <button onclick="submitHideForm()" style="background: #222; color: #fff; border: 1px solid #333; padding: 8px 16px; border-radius: 3px; cursor: pointer; font-size: inherit; font-family: inherit; width: auto;">Seal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addStaffMemoModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeStaffMemoModal()">×</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: #fff;">Add Staff Note</h2>
+            <div id="staffMemoModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <select id="memoType">
+                    <option value="" selected=""></option>
+                    <option value="priority">Priority</option>
+                </select>
+                <textarea id="memoContent" placeholder="Note"></textarea>
+                <button onclick="submitStaffMemo()" style="background: #753B3B; color: #fff; border: 1px solid #282828; padding: 4px 12px; border-radius: 3px; cursor: pointer; font-weight: bold; font-size: inherit; font-family: inherit;">Add Note</button>
+            </div>
+        </div>
+    </div>
+    <div id="viewStaffMemosModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000;">
+        <div style="height: 100%; display: flex; align-items: center; justify-content: center;">
+            <div class="modal-content" style="width: 800px; height: 600px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px;">
+                    <h2 style="margin: 0; flex: 1; color: #fff;">Staff Notes</h2>
+                    <button onclick="switchToAddMemo()" style="background: #753B3B; color: #fff; border: 1px solid #333; padding: 4px 12px; border-radius: 3px; cursor: pointer; font-size: inherit; font-family: inherit; position: absolute; left: 50%; top: 600px; transform: translateX(-50%);">New Note</button>
+                    <span class="modal-close" onclick="closeViewStaffMemosModal()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 20px;">×</span>
+                </div>
+                <div id="memosList" style="height: calc(100% - 70px); overflow-y: auto; padding: 0 10px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const pasteId = {{ id }};
+
+        function formatDate(dateString) {
+            if (!dateString?.trim() || dateString === 'undefined' || dateString === 'null') return 'Unknown Date';
+            const d = new Date(dateString);
+            if (isNaN(d)) return 'Unknown Date';
+            const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+            const day = d.getDate();
+            const s = ['th','st','nd','rd'][(day%10>3||day%100-day%10===10)?0:day%10];
+            return `${m} ${day}${s}, ${d.getFullYear()}`;
+        }
+
+        async function fetchMemos(pasteId) {
+            try {
+                const response = await fetch(`/api/fetchMemos?pasteID=${pasteId}`, { method: 'GET', credentials: 'same-origin' });
+                const { success, memos } = await response.json();
+                pasteMemos = success && Array.isArray(memos) ? memos.map(m => ({
+                    memoID: parseInt(m.id, 10) || null,
+                    type: m.type || '',
+                    value: m.value || '',
+                    username: m.username || '',
+                    createdAt: m.created_at || new Date().toISOString(),
+                    rankStyle: m.rankStyle || '',
+                    usernameColor: m.usernameColor || '',
+                    suffix: m.suffix || ''
+                })).filter(m => m.memoID) : [];
+            } catch {
+                pasteMemos = [];
+            }
+        }
+
+        function showStaffMemoModal() {
+            const modal = document.getElementById('addStaffMemoModal');
+            modal.style.display = 'flex';
+            document.getElementById('staffMemoModalError').style.display = 'none';
+            document.getElementById('memoContent').value = '';
+            document.getElementById('memoType').value = '';
+        }
+
+        function closeStaffMemoModal() {
+            document.getElementById('addStaffMemoModal').style.display = 'none';
+        }
+
+        async function submitStaffMemo() {
+            const type = document.getElementById('memoType').value;
+            const value = document.getElementById('memoContent').value.trim();
+            if (!value) return showError('staffMemoModalError', 'Memo cannot be blank!');
+            try {
+                const response = await fetch(`/api/addMemo?pasteID=${pasteId}&type=${encodeURIComponent(type)}&value=${encodeURIComponent(value)}`, { method: 'GET', credentials: 'same-origin' });
+                const { success, memoID, error } = await response.json();
+                if (success) {
+                    closeStaffMemoModal();
+                    showViewStaffMemosModal();
+                } else {
+                    showError('staffMemoModalError', error || 'Failed to add memo');
+                }
+            } catch {
+                showError('staffMemoModalError', 'An error occurred.');
+            }
+        }
+
+        async function showViewStaffMemosModal() {
+        document.getElementById('viewStaffMemosModal').style.display = 'flex';
+            await fetchMemos(pasteId);
+            const memosList = document.getElementById('memosList');
+            memosList.innerHTML = '';
+            pasteMemos.sort((a, b) => (b.type === 'priority' ? 1 : 0) - (a.type === 'priority' ? 1 : 0) || new Date(b.createdAt) - new Date(a.createdAt));
+            pasteMemos.forEach(memo => {
+                if (!memo.memoID) return;
+                const memoDiv = document.createElement('div');
+                memoDiv.style.cssText = 'background:#282828;border-radius:2px;padding:12px;margin-bottom:10px';
+                const headerDiv = document.createElement('div');
+                headerDiv.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px';
+                const leftSide = document.createElement('div');
+                leftSide.style.cssText = 'display:flex;align-items:center';
+                const userLink = document.createElement('a');
+                userLink.href = memo.username ? `/user/${memo.username}` : '/';
+                userLink.style.cssText = 'color:inherit;text-decoration:none';
+                const username = document.createElement('span');
+                username.style.cssText = memo.rankStyle + ' padding: 0 4px; display: inline-block; background-repeat: no-repeat;';
+
+                const coloredUsername = document.createElement('span');
+                coloredUsername.style.color = memo.usernameColor;
+                coloredUsername.textContent = memo.username;
+
+                username.appendChild(coloredUsername);
+                username.appendChild(document.createTextNode(' ' + memo.suffix));
+                userLink.appendChild(username);
+
+                leftSide.appendChild(userLink);
+                const timestamp = document.createElement('span');
+                timestamp.style.cssText = 'color:#666;margin-left:10px';
+                timestamp.textContent = formatDate(memo.createdAt);
+                leftSide.appendChild(timestamp);
+                const deleteBtn = document.createElement('span');
+                deleteBtn.style.cssText = 'color:#ff0000;margin-left:10px;cursor:pointer';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => deleteMemo(memo.memoID);
+                leftSide.appendChild(deleteBtn);
+                headerDiv.appendChild(leftSide);
+                if (memo.type === 'priority') {
+                    const priority = document.createElement('span');
+                    priority.style.cssText = 'color:#ff0000';
+                    priority.textContent = '[Priority]';
+                    headerDiv.appendChild(priority);
+                }
+                const content = document.createElement('div');
+                content.style.cssText = 'white-space:pre-wrap;color:#fff;font-size:13px;line-height:1.4';
+                content.textContent = memo.value;
+                memoDiv.appendChild(headerDiv);
+                memoDiv.appendChild(content);
+                memosList.appendChild(memoDiv);
+            });
+        }
+
+        function closeViewStaffMemosModal() {
+            document.getElementById('viewStaffMemosModal').style.display = 'none';
+        }
+
+        function switchToAddMemo() {
+            closeViewStaffMemosModal();
+            showStaffMemoModal();
+        }
+
+        async function deleteMemo(memoId) {
+            const confirmed = confirm('Are you sure you want to do this?');
+            if (!confirmed) return;
+
+            if (!memoId || isNaN(parseInt(memoId))) return alert('Invalid memo ID.');
+            try {
+                const response = await fetch(`/api/deleteMemo?memoID=${encodeURIComponent(memoId)}`, { method: 'GET', credentials: 'same-origin' });
+                const { success, error } = await response.json();
+                if (success) {
+                    pasteMemos = pasteMemos.filter(memo => memo.memoID !== memoId);
+                    showViewStaffMemosModal();
+                    alert('Memo deleted successfully.');
+                } else {
+                    alert(`Failed to delete memo: ${error || 'Unknown error'}`);
+                }
+            } catch (e) {
+                alert(`Error deleting memo: ${e.message}`);
+            }
+        }
+       
+        function showError(id, msg) {
+            const e = document.getElementById(id);
+            e.textContent = msg;
+            e.style.display = 'block';
+        }
+    </script>
+
+    <script>
+        const flag_id = {{ flag.id }};
+        const flag = {
+            link: '{{ title_c }}'
+        };
+
+        document.querySelector('.toggle-sidebar').addEventListener('click', function() {
+            document.querySelector('.sidebar').classList.toggle('hidden');
+        });
+
+        function reviewFlag(verdict) {
+            if (!verdict) {
+                fetch(`/api/reviewFlag?flagID=${flag_id}&verdict=0`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            {% if nextFlag %}
+                            window.location.href = "/admin/flags/{{ nextFlag }}";
+                            {% else %}
+                            window.location.href = "/admin/flags";
+                            {% endif %}
+                        }
+                    });
+            }
+        }
+
+        function showHideModal() {
+            document.getElementById('hideModal').style.display = 'flex';
+            document.getElementById('hideModalError').style.display = 'none';
+			document.getElementById('hide-dropdown').value = `{{ flag.reason }}`;
+			document.getElementById('hide-reason').value = `{{ flag.reason }}`;
+            document.getElementById('notifyUser').checked = true;
+        }
+
+        function closeHideModal() {
+            document.getElementById('hideModal').style.display = 'none';
+        }
+
+        function updateReasonInput() {
+            const dropdown = document.getElementById('hide-dropdown');
+            const reasonInput = document.getElementById('hide-reason');
+            reasonInput.value = dropdown.value;
+        }
+
+        function submitHideForm() {
+            const reason = document.getElementById('hide-reason').value.trim();
+            const notifyUser = document.getElementById('notifyUser').checked;
+            const errorDiv = document.getElementById('hideModalError');
+
+            let url = `/api/reviewFlag?flagID=${flag_id}&verdict=1`;
+            if (reason) {
+                url += `&reason=${encodeURIComponent(reason)}`;
+            }
+            if (notifyUser) {
+                url += '&notify=1';
+            }
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        {% if nextFlag %}
+                        window.location.href = "/admin/flags/{{ nextFlag }}";
+                        {% else %}
+                        window.location.href = "/admin/flags";
+                        {% endif %}
+                    } else {
+                        errorDiv.textContent = data.error || 'Failed to approve flag';
+                        errorDiv.style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    errorDiv.textContent = 'An error occurred while approving the flag';
+                    errorDiv.style.display = 'block';
+                });
+        }
+    </script>
+</body>
+</html>

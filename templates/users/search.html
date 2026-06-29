@@ -1,0 +1,364 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Users | Vilebin</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/locale/ru.min.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        @media screen and (min-width: 769px) {
+            .content {
+                width: 50%;
+                max-width: 800px;
+                margin: 60px auto;
+            }
+            
+            .actions-col {
+                width: 10%;
+                text-align: center !important;
+				color: #ff0000;
+            }
+            
+            {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+            .actions-col {
+                width: 10%;
+                text-align: center !important;
+                color: #ff0000;
+            }
+
+            /* Adjust other column widths when Actions is present */
+            
+            td:first-child,
+            th:first-child {
+                width: 8%;
+            }
+            
+            td:nth-child(2),
+            th:nth-child(2) {
+                width: 22%;
+            }
+            
+            td:nth-child(3),
+            th:nth-child(3),
+            td:nth-child(4),
+            th:nth-child(4) {
+                width: 10%;
+            }
+            
+            td:nth-child(5),
+            th:nth-child(5) {
+                width: 12%;
+            }
+            {% endif %}
+
+        }
+        
+        @media screen and (max-width: 768px) {
+            .content {
+                width: 100% !important;
+                max-width: none !important;
+                margin: 40px 0 !important;
+                padding: 0 10px;
+                box-sizing: border-box;
+            }
+            
+            .rank-section {
+                width: 100%;
+                margin: 20px 0;
+            }
+            
+            table {
+                font-size: 12px;
+                table-layout: fixed;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Hide Pastes, Comments, and Actions columns on mobile */
+            th:nth-child(3),
+            td:nth-child(3),
+            th:nth-child(4),
+            td:nth-child(4),
+            .actions-col {
+                display: none;
+            }
+            
+            td, th {
+                padding: 6px 4px;
+                box-sizing: border-box;
+            }
+            
+            td:first-child,
+            th:first-child {
+                width: 40%;
+                max-width: none;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            td:first-child a {
+                display: block;
+                width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            td:nth-child(2),
+            th:nth-child(2) {
+                width: 35%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            td:nth-child(5),
+            th:nth-child(5) {
+                width: 25%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .content {
+            color: white;
+            padding-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 25px;
+            margin-bottom: 20px;
+            font-weight: normal;
+            color: white;
+        }
+
+        .search-container {
+            text-align: center;
+            margin: 10px 0 0 0;
+        }
+
+        .search-form {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .search-box {
+            background: #282828;
+            border: none;
+            outline: none;
+            color: white;
+            padding: 5px 10px;
+            width: 240px;
+            height: 32px;
+            box-sizing: border-box;
+        }
+
+        .search-box::placeholder {
+            color: #878787;
+        }
+
+        .search-box:focus {
+            outline: none;
+        }
+
+        .search-button {
+            background: #282828;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            height: 32px;
+            box-sizing: border-box;
+            font-size: 13px;
+        }
+
+        .showing-text {
+            text-align: center;
+            font-size: 13px;
+            margin: 10px 0;
+            color: #878787;
+        }
+
+        .rank-section {
+            margin-bottom: 25px;
+        }
+
+        .rank-section h2 {
+            color: white;
+            margin: 10px 0;
+            padding: 0;
+            font-weight: normal;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #080808;
+            font-size: 14px;
+        }
+
+        th {
+            padding: 8px;
+            text-align: left;
+            background: #181818;
+            font-weight: bold;
+            border: none;
+            border-bottom: 1px solid #333;
+        }
+
+        th:not(:first-child):not(:nth-child(2)) {
+            text-align: center;
+        }
+
+        td {
+            padding: 9px;
+            border: none;
+            border-bottom: 1px solid #333;
+        }
+
+        td:not(:first-child):not(:nth-child(2)) {
+            text-align: center;
+        }
+
+        tr {
+            background: #080808;
+        }
+
+        tr:nth-child(even) {
+            background: #181818;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Column widths */
+        td:first-child,
+        th:first-child {
+            width: 8%;
+        }
+
+        td:nth-child(2),
+        th:nth-child(2) {
+            width: 25%;
+            text-align: left;
+        }
+
+        td:nth-child(3),
+        th:nth-child(3),
+        td:nth-child(4),
+        th:nth-child(4) {
+            width: 10%;
+        }
+
+        td:nth-child(5),
+        th:nth-child(5) {
+            width: 12%;
+        }
+    </style>
+</head>
+<body class="bin" style="margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;">
+    {% endblock %}
+
+    {% block bottom %}
+    <div class="content">
+        <h1>Users</h1>
+
+        <div class="search-container">
+            <div id="error-msg" class="error-message"></div>
+            <form id="search-form" class="search-form" action="/users" method="POST">
+                <input id="search-query" name="search_query" type="text" class="search-box" placeholder="Username..." maxlength="20" value="{{ search_query }}">
+                <button type="submit" class="search-button">Search</button>
+            </form>
+        </div>
+        <p class="showing-text">Showing {{ found_users|length }} (of {{ all_users }}) users</p>
+
+        <!-- <div class="notification-banner">
+            <div class="notification-content">
+                <span class="notification-text">All services / Все услуги -</span>
+                <a href="https://t.me/vilebinceo" class="notification-link" target="_blank">@joker</a>
+            </div>
+        </div> -->
+
+        <div class="rank-section">
+            {% if found_users %}
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="text-center">ID</th>
+                            <th>Username</th>
+                            <th class="text-center">Pastes</th>
+                            <th class="text-center">Comments</th>
+                            <th class="text-center">Join date</th>
+                            {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                                <th style="color: red;">Actions</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in found_users %}
+                        <tr>
+                            <td>{{ user[0] }}</td>
+                            <td>
+                                {% set s = styles.get(user[2], styles['user']) %}
+                                <a href="/user/{{ user[1] }}" title="{{ user[1] }}" target="_blank" style="{{ s.rankStyle }}">
+                                    <span style="color: {{ user[4] }}; text-decoration: underline;">{{ user[1] }}</span>
+                                </a>
+                            </td>
+                            <td>{{ pastes_dict[user[1]] or 0 }}</td>
+                            <td>{{ comments_dict[user[1]] or 0 }}</td>
+                            <td title="{{ user[3] }}" id="time-{{ user[0] }}">{{ user[3] }}</td>
+                            {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                                <td class="actions-col"><a href="/admin/users/{{ user[1] }}" style="color: #ff0000;">Manage</a></td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>                
+                </table>
+            {% else %}
+            {% endif %}  
+        </div>        
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var usernameInput = document.getElementById('search-query');
+
+            usernameInput.addEventListener('input', function () {
+                var value = usernameInput.value;
+                usernameInput.value = value.replace(/[^a-zA-Z0-9]/g, '');
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            moment.locale('en');
+            {% for user in found_users %}
+                var userDate = "{{ user[3] }}";
+                var formattedTime = moment(userDate, ['DD-MM-YYYY HH:mm:ss', 'YYYY-MM-DD HH:mm:ss']).fromNow();
+                
+                var timeElement = document.getElementById("time-{{ user[0] }}");
+                if (timeElement) {
+                    timeElement.innerText = formattedTime;
+                    timeElement.title = userDate;
+                }
+            {% endfor %}
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

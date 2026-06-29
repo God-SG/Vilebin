@@ -1,0 +1,223 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Flags | Vilebin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<style>
+    @media screen and (min-width: 769px) {
+        .content {
+            width: 75%;
+            max-width: 1100px;
+            margin: 60px auto;
+        }
+    }
+    
+    @media screen and (max-width: 768px) {
+        .content {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 40px 0 !important;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        
+        table {
+            font-size: 12px;
+            table-layout: fixed;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        td, th {
+            padding: 6px 4px;
+            box-sizing: border-box;
+        }
+    }
+
+    .content {
+        color: white;
+        padding-top: 20px;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 25px;
+        margin-bottom: 20px;
+        font-weight: normal;
+        color: white;
+    }
+
+    .stats-section {
+        margin-bottom: 25px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #181818;
+        padding: 15px;
+        width: 100%;
+        border-radius: 3px;
+        box-sizing: border-box;
+    }
+
+    .stats-section span {
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .stats-section span > span {
+        display: none;
+    }
+
+    .stats-section span.total {
+        color: #aaaaaa;
+    }
+
+    .stats-section span.approved {
+        color: #39ff14;
+    }
+
+    .stats-section span.denied {
+        color: #ff0000;
+    }
+
+    .stats-section span b {
+        color: inherit;
+    }
+
+    .flags-section {
+        margin-bottom: 25px;
+    }
+
+    .flags-section h2 {
+        color: white;
+        margin: 10px 0;
+        padding: 0;
+        font-weight: normal;
+        font-size: 16px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #080808;
+        font-size: 14px;
+    }
+
+    th {
+        padding: 8px;
+        text-align: left;
+        background: #181818;
+        font-weight: bold;
+        border: none;
+        border-bottom: 1px solid #333;
+    }
+
+    td {
+        padding: 9px;
+        border: none;
+        border-bottom: 1px solid #333;
+    }
+
+    tr {
+        background: #181818;
+    }
+
+    tr:nth-child(even) {
+        background: #080808;
+    }
+
+    a {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    td.verdict {
+        font-weight: bold;
+    }
+    td.verdict.pending {
+        color: #ffff00;
+    }
+    td.verdict.approved {
+        color: #39ff14;
+    }
+    td.verdict.denied, td.verdict.canceled {
+        color: #ff0000;
+    }
+</style>
+
+<body class="bin" style="margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;">    
+    <div class="content">
+        <div class="stats-section">
+            <span class="total">Flags: {{ flags | length }}</span>
+            <span class="total">Flags (7 days): {{ flags_7_days }}</span>
+            <span class="approved">Approved: {{ approved_count }}</span>
+            <span class="denied">Denied: {{ denied_count }}</span>
+        </div>        
+
+        <div class="flags-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Reason</th>
+                        <th>Verdict</th>
+                        <th>Flagged At</th>
+                        <th>Reviewed At</th>
+                        <th>Reviewed By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for flag in flags | reverse %}
+                    <tr>
+                        <td>
+                            <a href="/upload/{{ flag.post | replace(' ', '') }}" target="_blank">{{ flag.post }}</a>
+                        </td>
+                        <td>{{ flag.reason }}</td>
+                        <td class="verdict {% if flag.status == 'approved' %}approved{% elif flag.status == 'denied' or flag.status == 'denied' %}denied{% elif flag.status == 'pending' %}pending{% else %}denied{% endif %}">
+                            {% if flag.status == 'approved' %}
+                                Approved
+                            {% elif flag.status == 'denied' %}
+                                Denied
+                            {% elif flag.status == 'cancelled' %}
+                                Canceled
+                            {% elif flag.status == 'pending' %}
+                                Pending
+                            {% else %}
+                                Unknown
+                            {% endif %}
+                        </td>
+                        <td>{{ flag.date_formatted }}</td>
+                        <td>{% if flag.checkdate_formatted %}{{ flag.checkdate_formatted }}{% else %}—{% endif %}</td>
+                        <td>
+                            {% if flag.moderator %}
+                                {% set s = styles.get(flag.moderator_status, styles['user']) %}
+                                <a href="/user/{{ flag.moderator }}" target="_blank" style="{{ s.rankStyle }} text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                    <span style="color: {{ flag.moderator_color }};">{{ flag.moderator }}</span> {{ s.suffix }}
+                                </a>
+                            {% else %}
+                            —
+                            {% endif %}
+                        </td>                        
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
+{% endblock %}

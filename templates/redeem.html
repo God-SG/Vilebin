@@ -1,0 +1,192 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<head>
+    <title>Redeem | Vilebin</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta name="robots" content="noindex">
+    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<style>
+    .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 100px);
+    }
+
+    .gift-card {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        padding: 40px;
+        text-align: center;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .gift-icon {
+        color: #7B2BF7;
+        margin-bottom: 20px;
+    }
+
+    .gift-icon i {
+        font-size: 3rem;
+    }
+
+    .gift-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #fff;
+        margin-bottom: 25px;
+    }
+
+    .claim-button {
+        background: #7B2BF7;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        font-size: 1rem;
+        cursor: pointer;
+        font-weight: bold;
+        width: 200px;
+    }
+
+    .claim-button:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            padding: 0 15px;
+            min-height: calc(100vh - 80px);
+        }
+
+        .gift-card {
+            padding: 30px 20px;
+        }
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+    }
+
+    .modal-content {
+        background: #0C0C0C;
+        padding: 20px;
+        width: 70%;
+        max-width: 500px;
+        color: #fff;
+        border: 1px solid #333;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    #statusMessage {
+        color: #fff;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    .button-container {
+        text-align: center;
+    }
+
+    .modal-button {
+        background: #1a1a1a;
+        border: 1px solid #333;
+        color: #fff;
+        padding: 4px 8px;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+    .modal-button:hover {
+        background: #222;
+    }
+</style>
+<body>
+    <main>
+        <div class="main-container">
+            <div class="gift-card">
+                <div class="gift-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h1 class="gift-title">Redeem Gift</h1>
+                <button id="claim-button" class="claim-button">Redeem</button>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal" id="statusModal">
+        <div class="modal-content">
+            <div id="statusMessage"></div>
+            <div class="button-container">
+                <button class="modal-button" onclick="closeStatusModal()">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function showStatus(message, isSuccess) {
+        const modal = document.getElementById('statusModal');
+        const statusMessage = document.getElementById('statusMessage');
+        statusMessage.textContent = message;
+        statusMessage.style.color = isSuccess ? '#39ff14' : 'red';
+        modal.style.display = 'block';
+    }
+
+    function closeStatusModal() {
+        const modal = document.getElementById('statusModal');
+        modal.style.display = 'none';
+        
+        if (document.getElementById('statusMessage').style.color === 'rgb(57, 255, 20)') {
+            window.location.href = '/';
+        } else if (document.getElementById('statusMessage').textContent === 'Please login.') {
+            window.location.href = '/login';
+        }
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('statusModal');
+        if (event.target == modal) {
+            closeStatusModal();
+        }
+    }
+
+    document.getElementById('claim-button').addEventListener('click', async function() {
+        const button = this;
+        button.disabled = true;
+
+        try {
+            const response = await fetch(`/api/claimGift?giftID={{ redeem_id }}`);
+            const data = await response.json();
+
+            if (data.success) {
+                showStatus(data.message, true);
+            } else {
+                showStatus(data.error, false);
+                button.disabled = false;
+            }
+        } catch (error) {
+            showStatus('Error claiming gift! Please try again.', false);
+            button.disabled = false;
+        }
+    });
+    </script>
+</body>
+</html>
+{% endblock %}

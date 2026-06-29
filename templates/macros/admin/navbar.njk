@@ -1,0 +1,14 @@
+{% macro nav(href, icon, title, badge_id=null, current_path='') %}
+    {% set isActive = false %}
+    {% if current_path == href %}{% set isActive = true %}{% endif %}
+    {% if href != '/admin' %}
+        {% if current_path | string | truncate(href|length + 1, true, '') == href + '/' %}{% set isActive = true %}{% endif %}
+    {% endif %}
+    <a href="{{ href }}" class="{% if isActive %}active{% endif %}">
+        <i class="fas {{ icon }}"></i>
+        <span>{{ title }}</span>
+        {% if badge_id %}
+            <span id="{{ badge_id }}" class="badge" style="display:none"></span>
+        {% endif %}
+    </a>
+{% endmacro %}

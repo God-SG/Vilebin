@@ -1,0 +1,227 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!doctype html>
+<html lang="en">
+<body>
+{% include 'admin/navbar.html' %}
+
+<div class="main-container">
+    <div class="search-container">
+        <div class="search-inputs">
+            <input type="text" id="staff" value="{{ staffFilter or '' }}" placeholder="Staff">
+            <select id="verdict">
+                <option value="">Verdict</option>
+                <option value="pending" {% if verdictFilter == 'pending' %}selected{% endif %}>Pending</option>
+                <option value="approved" {% if verdictFilter == 'approved' %}selected{% endif %}>Approved</option>
+                <option value="denied" {% if verdictFilter == 'denied' %}selected{% endif %}>Denied</option>
+                <option value="cancelled" {% if verdictFilter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+            </select>
+            <button onclick="search()">Search</button>
+            <span class="total-count">(total {{ totalCount }})</span>
+        </div>
+    </div>
+
+    <table class="flags-table">
+        <thead>
+            <tr>
+                <th>Paste</th>
+                <th>Flagged By</th>
+                <th>Reason</th>
+                <th>Verdict</th>
+                <th>Reviewed By</th>
+                <th>Flagged At</th>
+                <th>Reviewed At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in flags %}
+            <tr>
+                <td>
+                    <a href="/upload/{{ f.post | replace(' ', '') }}" target="_blank" style="color: #2A9FD6">{{ f.post }}</a>
+                </td>
+                <td>
+                    {% if f.reporter %}
+                    <a href="/admin/users/{{ f.reporter }}" style="color:#87cefa; font-weight:bold;">
+                        <span style="color: {{ f.reportercolor or '#BB71E4' }}">{{ f.reporter }}</span>
+                        [Council]
+                    </a>
+                    {% else %}
+                    N/A
+                    {% endif %}
+                </td>
+                <td>{{ f.reason }}</td>
+                <td>
+                    <span class="verdict-{{ f.status }}">{{ f.status | capitalize }}</span>
+                </td>
+                <td>
+                    {% if f.moderator %}
+                        {% set s = styles.get(f.moderatorstatus, styles['user']) %}
+                        <a href="/admin/users/{{ f.moderator }}" target="_blank" style="{{ s.rankStyle }} font-weight:bold; text-decoration-color: {{ s.rankColor }};">
+                            <span style="color: {{ f.moderatorcolor }};">{{ f.moderator }}</span> {{ s.suffix }}
+                        </a>
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>{{ f.date }}</td>
+                <td>{{ f.checkdate or 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination">
+        {% if page > 1 %}
+        <a href="?page={{ page - 1 }}{% if staffFilter %}&staff={{ staffFilter }}{% endif %}{% if verdictFilter %}&verdict={{ verdictFilter }}{% endif %}">←</a>
+        {% endif %}
+        <span>Page {{ page }} of {{ totalPages }}</span>
+        {% if page < totalPages %}
+        <a href="?page={{ page + 1 }}{% if staffFilter %}&staff={{ staffFilter }}{% endif %}{% if verdictFilter %}&verdict={{ verdictFilter }}{% endif %}">→</a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .main-container {
+        margin-left: 260px;
+        color: #fff;
+        padding: 20px;
+    }
+    @media (max-width: 768px) {
+        .main-container {
+            margin-left: 0;
+            padding-top: 75px;
+        }
+    }
+        
+    .search-container {
+        margin-bottom: 20px;
+    }
+    
+    .search-inputs {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: #1a1a1a;
+        color: #fff;
+        font-size: 12px;
+        table-layout: fixed;
+    }
+    
+    th, td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #333;
+        height: 20px;
+        line-height: 20px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Column widths */
+    th:nth-child(1), td:nth-child(1) { width: 20%; } /* Paste */
+    th:nth-child(2), td:nth-child(2) { width: 15%; } /* Flagged By */
+    th:nth-child(3), td:nth-child(3) { width: 15%; } /* Reason */
+    th:nth-child(4), td:nth-child(4) { width: 10%; } /* Verdict */
+    th:nth-child(5), td:nth-child(5) { width: 15%; } /* Reviewed By */
+    th:nth-child(6), td:nth-child(6) { width: 12.5%; } /* Flagged At */
+    th:nth-child(7), td:nth-child(7) { width: 12.5%; } /* Reviewed At */
+    
+    th {
+        background: #212121;
+        font-weight: bold;
+    }
+    
+    .search-container input[type="text"] {
+        padding: 8px;
+        border: none;
+        background: #1a1a1a;
+        color: #fff;
+        outline: none;
+        height: 35px;
+    }
+    
+    .search-container select {
+        padding: 8px;
+        border: none;
+        background: #1a1a1a;
+        color: #fff;
+        outline: none;
+        height: 35px;
+    }
+    
+    .search-container button {
+        padding: 8px 15px;
+        background: #333;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        height: 35px;
+    }
+    
+    .flags-table a:visited {
+        color: inherit;
+    }
+    
+    .pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+    }
+    
+    .pagination a {
+        padding: 8px 15px;
+        background: #333;
+        color: #fff;
+        text-decoration: none;
+        font-size: 18px;
+    }
+
+    .verdict-pending {
+        color: #ffd700;
+    }
+    
+    .verdict-approved {
+        color: #00ff00;
+    }
+    
+    .verdict-denied {
+        color: #ff0000;
+    }
+    
+    .verdict-cancelled {
+        color: #888;
+    }
+</style>
+
+<script>
+function search() {
+    const staff = document.getElementById('staff').value;
+    const verdict = document.getElementById('verdict').value;
+    let url = '/admin/logs/flags';
+    const params = [];
+    
+    if (staff) params.push(`staff=${encodeURIComponent(staff)}`);
+    if (verdict) params.push(`verdict=${encodeURIComponent(verdict)}`);
+    if (params.length) url += '?' + params.join('&');
+    
+    window.location.href = url;
+}
+
+document.getElementById('staff').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') search();
+});
+</script>
+
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Reset Password</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/nav.css">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+<style>
+		input {
+			outline: none !important;
+			box-shadow: none !important;
+		}
+
+		input:focus {
+			outline: none !important;
+			box-shadow: none !important;
+		}
+
+		*:focus {
+			outline: none !important;
+			box-shadow: none !important;
+		}
+
+		input, textarea, select {
+			font-size: 16px !important;
+		}
+
+        ::-webkit-scrollbar {
+            display: none;
+        }
+
+        html {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+        }
+
+        .verification-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        body.modal-open .verification-modal {
+            pointer-events: all;
+        }
+
+        .verification-content {
+            background: #1a1a1a;
+            color: #fff;
+            padding: 2rem;
+            border-radius: 0;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .verification-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .verification-buttons button {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 0;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .verification-buttons button:hover {
+            opacity: 1;
+        }
+
+        .approve-btn {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .deny-btn {
+            background: #f44336;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bin" style="margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;">
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #060606;
+            color: #fff;
+        }
+        .password-form {
+            background: #181818;
+            padding: 20px;
+            border-radius: 3px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .description {
+            margin-bottom: 20px;
+            color: #bfbfbf;
+            font-size: 14px;
+        }
+        .error-message {
+            color: #ff0000;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #fff;
+            font-size: 13px;
+        }
+        .form-group input {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            color: #fff;
+            font-size: 13px;
+            border-radius: 3px;
+            height: 32px;
+            box-sizing: border-box;
+            padding: 0 8px;
+        }
+        .form-group input:focus {
+            outline: none;
+        }
+        .button {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 3px;
+            transition: all 0.2s;
+        }
+        .button:hover {
+            background: #666;
+        }
+    </style>
+
+    <div class="container">
+        <div class="password-form">
+            <h1>Change Password</h1>
+            
+            <div class="description">
+                Please enter new password.
+            </div>
+
+            <form method="POST">
+                <div class="form-group">
+                    <label for="password" style="font-weight: bold;">Password:</label>
+                    <input type="password" id="password" name="NewPassword" required>
+                </div>
+                <button type="submit" class="button">Change</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

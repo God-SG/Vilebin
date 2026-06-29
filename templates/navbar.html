@@ -1,0 +1,1421 @@
+{% block top %}
+{% endblock %}
+<link rel="stylesheet" href="/static/nav.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+<link rel="icon" href="data:,">
+
+<style>
+    input {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    input:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    *:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    input, textarea, select {
+        font-size: 16px !important;
+    }
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+
+    html {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    .verification-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    body.modal-open {
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    body.modal-open .verification-modal {
+        pointer-events: all;
+    }
+
+    .verification-content {
+        background: #1a1a1a;
+        color: #fff;
+        padding: 2rem;
+        border-radius: 0;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+    }
+
+    .verification-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .verification-buttons button {
+        padding: 0.5rem 1.5rem;
+        border: none;
+        border-radius: 0;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .verification-buttons button:hover {
+        opacity: 1;
+    }
+
+    .approve-btn {
+        background: #4CAF50;
+        color: white;
+    }
+
+    .deny-btn {
+        background: #f44336;
+        color: white;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+        const host = window.location.host;
+    
+        function generateClientId() {
+            return 'xxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0,
+                    v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+    
+        const clientId = localStorage.getItem("client_id") || generateClientId();
+        localStorage.setItem("client_id", clientId);
+    
+        const socketUrl = `${protocol}://${host}/ws/${clientId}?username={{ username }}`;
+        const socket = new WebSocket(socketUrl);
+
+        {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+            function addNotify(title, body, url) {
+                if (Notification.permission === 'granted') {
+                    const notification = new Notification(title, {
+                        body: body,
+                        tag: `${title}-${Date.now()}`
+                    });
+
+                    if (url) {
+                        notification.onclick = () => {
+                            window.open(url, '_blank');
+                            notification.close();
+                        };
+                    }
+                } else if (Notification.permission !== 'denied') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            const notification = new Notification(title, {
+                                body: body,
+                                tag: `${title}-${Date.now()}`
+                            });
+                            if (url) {
+                                notification.onclick = () => {
+                                    window.open(url, '_blank');
+                                    notification.close();
+                                };
+                            }
+                        } else {
+                            window.location.href = '/settings';
+                        }
+                    });
+                }
+            }
+        {% endif %}
+
+        socket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+
+            if (data.event === 'online') {
+                const onlineCounts = document.querySelectorAll('.online-count');
+                onlineCounts.forEach(count => {
+                    count.textContent = data.data;
+                    count.style.display = 'flex';
+                });
+            }
+
+            if (data.event === 'refresh') {
+                location.reload();
+            }
+
+            {#
+            if (data.event === 'clear_chat') {
+                const messages = document.querySelectorAll('[data-message-id]');
+                messages.forEach(messageElement => {
+                    messageElement.remove();
+                });
+            }
+
+            if (data.event === 'send_message') {
+                addMessageToChat(data.data);
+            }
+
+            if (data.event === 'delete_message') {
+                const messageElement = document.querySelector(`[data-message-id="${data.data.messageID}"]`);
+                if (messageElement) {
+                    messageElement.remove();
+                }
+            }
+            #}
+
+            {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+            if (data.event === 'notify') {
+                addNotify(data.data.title, data.data.body, data.data.url);
+            }
+            {% endif %}
+        };
+    
+        window.socket = socket;
+    });
+</script>
+
+<style>
+    #notifications-container {
+        max-height: 400px;
+        overflow-y: auto;
+        background: #000000;
+    }
+    #notifications-container > div {
+        padding: 4px 15px;
+        border-bottom: 1px solid #282828;
+        background: #000000;
+    }
+    .notification-message {
+        white-space: normal;
+        word-break: break-word;
+        display: block;
+        font-size: 13px;
+        line-height: 16px;
+    }
+    .notification-message a {
+        color: #2A9FD6 !important;
+        text-decoration: none !important;
+        display: inline;
+    }
+    .notification-message a:hover {
+        color: #2A9FD6 !important;
+        text-decoration: underline !important;
+    }
+    #notifications-container::-webkit-scrollbar {
+        width: 8px !important;
+    }
+    #notifications-container::-webkit-scrollbar-track {
+        background: #060606 !important;
+    }
+    #notifications-container::-webkit-scrollbar-thumb {
+        background: #282828 !important;
+        border-radius: 4px !important;
+    }
+    #notifications-container::-webkit-scrollbar-thumb:hover {
+        background: #333 !important;
+    }
+    #notification-dropdown {
+        border-radius: 4px;
+    }
+    #notification-dropdown::before {
+        display: none;
+    }
+    .notification-highlight {
+        background: rgba(255, 255, 0, 0.1) !important;
+    }
+    .online-count {
+        display: flex;
+        align-items: center;
+        color: #00ff00;
+        font-size: 12px;
+    }
+    .online-count::before {
+        content: '';
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: #00ff00;
+        border-radius: 50%;
+        margin-right: 6px;
+        animation: pulse 2s infinite;
+        box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+    }
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 6px rgba(0, 255, 0, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+        }
+    }
+    .mobile-only {
+        display: none !important;
+    }
+    @media (max-width: 1000px) {
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .mobile-only.online-count {
+            display: flex !important;
+            margin-left: 0px;
+            font-size: 12px;
+        }
+        .mobile-only.online-count::before {
+            width: 6px;
+            height: 6px;
+            margin-right: 6px;
+        }
+        .desktop-only {
+            display: none !important;
+        }
+    }
+
+    .notification-container {
+        visibility: hidden;
+        pointer-events: none;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 9999;
+        max-width: 350px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        background-color: #111;
+        border: 1px solid #333;
+        color: #fff;
+        border-radius: 3px;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s;
+        font-family: 'Inter', sans-serif;
+        display: block;
+    }
+
+    .notification-container.show {
+        visibility: visible;
+        pointer-events: auto;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .notification-header {
+        background-color: #181818;
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #333;
+    }
+    
+    .notification-title {
+        font-weight: 600;
+        font-size: 14px;
+    }
+    
+    .notification-close {
+        color: #666;
+        cursor: pointer;
+        font-size: 18px;
+        transition: color 0.2s;
+        padding: 0 5px;
+    }
+    
+    .notification-close:hover {
+        color: #999;
+    }
+    
+    .notification-body {
+        padding: 15px;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+    
+    .notification-footer {
+        padding: 0 15px 15px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    
+    .notification-btn {
+        background: #222;
+        color: #fff;
+        border: 1px solid #333;
+        padding: 6px 14px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 13px;
+        transition: background-color 0.2s;
+        outline: none;
+    }
+    
+    .notification-btn:hover {
+        background: #282828;
+    }
+    
+    .notification-btn.primary {
+        background: rgb(17, 17, 17);
+        border: 1px solid #312f2f;
+    }
+    
+    .notification-btn.primary:hover {
+        background: #312f2f;
+    }
+</style>
+
+{#
+<!-- CHAT -->
+
+<style>
+    .chat-container {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 20px !important;
+        width: 600px !important;
+        height: 400px !important;
+        background: #1a1a1a !important;
+        border: 1px solid #333 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        z-index: 1000 !important;
+        isolation: isolate !important;
+    }
+    .chat-header {
+        padding: 4px 8px !important;
+        background: #222 !important;
+        border-bottom: 1px solid #333 !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        color: #fff !important;
+        font-size: 12px !important;
+    }
+    .chat-messages {
+        flex: 1 !important;
+        overflow-y: scroll !important;
+        padding: 8px 8px 8px 8px !important;
+        font-size: 12px !important;
+        overscroll-behavior: contain !important;
+        -ms-overflow-style: none !important;
+    }
+    .chat-input-container {
+        padding: 8px !important;
+        border-top: 1px solid #333 !important;
+        display: flex !important;
+        gap: 8px !important;
+    }
+    .chat-input {
+        flex: 1 !important;
+        padding: 6px !important;
+        border: 1px solid #333 !important;
+        background: #222 !important;
+        color: #fff !important;
+        font-size: 12px !important;
+    }
+    .chat-send-btn {
+        padding: 6px 12px !important;
+        background: #333 !important;
+        border: none !important;
+        color: #fff !important;
+        cursor: pointer !important;
+        font-size: 12px !important;
+        border-radius: 0 !important;
+    }
+    .message {
+        margin: 2px 0 !important;
+        padding: 2px 2px 2px 0 !important;
+        word-wrap: break-word !important;
+        cursor: pointer !important;
+        display: block !important;
+    }
+    .message .author {
+        white-space: nowrap !important;
+        display: inline !important;
+    }
+    .message .content {
+        color: #fff !important;
+        display: inline !important;
+    }
+    .message .content span {
+        display: inline !important;
+    }
+    .message .chat-timestamp {
+        color: #888 !important;
+        font-size: 11px !important;
+        white-space: nowrap !important;
+        display: inline !important;
+    }
+    .chat-toggle {
+        position: fixed !important;
+        bottom: 20px !important;
+        left: 20px !important;
+        padding: 8px 16px !important;
+        background: #333 !important;
+        color: #fff !important;
+        border: none !important;
+        cursor: pointer !important;
+        z-index: 999 !important;
+        font-size: 12px !important;
+        border-radius: 0 !important;
+    }
+    .chat-container.hidden {
+        display: none !important;
+    }
+    .chat-msg-modal {
+        display: none !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        background: rgba(0, 0, 0, 0.85) !important;
+        z-index: 1001 !important;
+    }
+
+    .chat-msg-modal.show {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .chat-msg-modal-content {
+        background: #141414 !important;
+        padding: 24px !important;
+        width: 90% !important;
+        max-width: 400px !important;
+        color: #fff !important;
+        border: 1px solid #333 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    #chat-msg-info {
+        color: #fff !important;
+        margin-bottom: 24px !important;
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+        padding: 10px;
+        word-break: break-word;
+    }
+
+    #chat-msg-info a:hover {
+        text-decoration: underline !important;
+    }
+
+    .chat-msg-info-header {
+        color: #888 !important;
+        font-size: 12px !important;
+        margin-bottom: 4px !important;
+    }
+
+    .chat-msg-button-container {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .chat-msg-button {
+        background: #1E1E1E !important;
+        border: 1px solid #333 !important;
+        color: #fff !important;
+        padding: 8px 16px !important;
+        font-size: 13px !important;
+        cursor: pointer !important;
+        width: 100% !important;
+        text-align: center !important;
+        border-radius: 0 !important;
+    }
+
+    .chat-close {
+        background: none !important;
+        border: none !important;
+        color: #fff !important;
+        font-size: 20px !important;
+        line-height: 1 !important;
+        padding: 0 !important;
+        cursor: pointer !important;
+        margin: 0 !important;
+    }
+
+    .chat-close:hover {
+        color: #ff0000 !important;
+    }
+
+    @media (max-width: 768px) {
+        .chat-container {
+            width: 100% !important;
+            left: 0 !important;
+            bottom: 0 !important;
+            border: none !important;
+            border-top: 1px solid #333 !important;
+        }
+
+        .chat-toggle {
+            left: 10px !important;
+        }
+
+        .chat-input {
+            font-size: 16px !important;
+        }
+    }
+
+    .message a:hover {
+        text-decoration: underline !important;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        height: 20px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #333;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 2px;
+        bottom: 2px;
+        background-color: #fff;
+    }
+
+    input:checked + .slider {
+        background-color: #ff0000;
+    }
+
+    input:checked + .slider:before {
+        transform: translateX(20px);
+    }
+
+    /* NEW YEAR */
+    .snowflake {
+        user-select: none !important;
+        pointer-events: none !important;
+    }
+</style>
+
+<button class="chat-toggle" onclick="toggleChat()">Chat</button>
+
+<div class="chat-container hidden">
+    <div class="chat-header">
+        <span id="chatTitle" style="cursor: default">Chat</span>
+        <button class="chat-close" onclick="toggleChat()">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-container">
+        <input type="text" class="chat-input" id="messageInput" placeholder="Message Vilebin" maxlength="200">
+        <button class="chat-send-btn" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<div id="chatSettingsModal" class="chat-msg-modal">
+    <div class="chat-msg-modal-content" style="max-width: 300px;">
+        <h3 style="color: #fff; margin: 0 0 20px 0; font-size: 16px;">Chat Settings</h3>
+        <div class="chat-msg-button-container" style="gap: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="color: #fff;">Enable Chat</span>
+                <label class="switch">
+                    <input type="checkbox" id="chatEnabledToggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="chat-msg-modal" id="chatMessageModal" onclick="closeMessageModal(event)">
+    <div class="chat-msg-modal-content">
+        <div id="chat-msg-info"></div>
+        <div class="chat-msg-button-container">
+            <button id="chatBanMessageBtn" class="chat-msg-button" onclick="chatBanUser()" style="display: none;">Mute</button>
+            <button id="chatDeleteMessageBtn" class="chat-msg-button" onclick="deleteSelectedMessage()" style="display: none;">Delete</button>
+            <button id="chatVisitProfileBtn" class="chat-msg-button" onclick="visitProfile()" style="display: none;"></button>
+            <button id="chatCopyMessageIdBtn" class="chat-msg-button" onclick="copyMessageId(this.dataset.messageId)" style="display: none;">Copy Message ID</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedMessage = null;
+
+    window.isStaff = {% if status in ['admin', 'founder', 'manager', 'mod', 'council'] %}true{% else %}false{% endif %};
+    window.authenticatedUsername = '{{ username }}';
+
+    function toggleChat() {
+        const container = document.querySelector('.chat-container');
+        container.classList.toggle('hidden');
+        localStorage.setItem('chatWindowOpen', !container.classList.contains('hidden'));
+        if (!container.classList.contains('hidden')) {
+            document.getElementById('messageInput').focus();
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatOpen = localStorage.getItem('chatWindowOpen') === true;
+        const container = document.querySelector('.chat-container');
+        if (chatOpen) {
+            container.classList.remove('hidden');
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        const chatHeader = document.querySelector('.chat-header');
+        const chatInputContainer = document.querySelector('.chat-input-container');
+        
+        [chatHeader, chatInputContainer].forEach(element => {
+            element.addEventListener('touchmove', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+            
+            element.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }, { passive: false });
+        });
+
+        const messageInput = document.getElementById('messageInput');
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        loadMessages();
+    });
+
+    async function loadMessages() {
+        const chatMessages = document.getElementById('chatMessages');
+
+        const response = await fetch('/api/messages');
+        if (!response.ok) {
+            throw new Error(`Ошибка загрузки: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const messages = data.messages || [];
+
+        messages.reverse().forEach(message => {
+            addMessageToChat(message);
+        });
+
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function sendMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const content = messageInput.value.trim();
+        if (content) {
+            fetch(`/api/sendMessage?content=${encodeURIComponent(content)}&clientId=${localStorage.getItem("client_id")}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                messageInput.value = '';
+                
+                const chatMessages = document.getElementById('chatMessages');
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+                
+                if (!data.success && data.error && data.remaining) {
+                    const messageInput = document.getElementById('messageInput');
+                    const sendButton = document.querySelector('.chat-send-btn');
+                    messageInput.disabled = true;
+                    sendButton.disabled = true;
+
+                    setTimeout(() => {
+                        messageInput.disabled = false;
+                        sendButton.disabled = false;
+                        messageInput.focus();
+                    }, data.remaining);
+                }
+            });
+        }
+    }
+
+    function addMessageToChat(message) {
+        const chatMessages = document.getElementById('chatMessages');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'message';
+        messageElement.dataset.messageId = message.messageID;
+        let authorStyle = '';
+        let displayName = message.displayName;
+        
+        if (message.userID === null) {
+            authorStyle = 'color: #ff0000; font-weight: bold;';
+            displayName = `${displayName} [System]`;
+            messageElement.innerHTML = `
+                <span class="chat-timestamp">${message.createdAt}</span>
+                <span class="author" style="${authorStyle}">${displayName}:</span>
+                <span class="content"><span>${linkifyText(message.content, true)}</span></span>
+            `;
+            messageElement.addEventListener('click', function(e) {
+                if (!e.target.closest('a')) {
+                    showMessageModal(message, e);
+                }
+            });
+        } else {
+            if (message.userID === null) {
+                authorStyle = 'color: #fff';
+                displayName = `${displayName} [Anonymous]`;
+            } else if (message.rankData) {
+                authorStyle = message.rankData.rankStyle || '';
+                if (message.usernameColor) {
+                    displayName = `<span style="color: ${message.usernameColor}">${displayName}</span> ${message.rankData.suffix}`;
+                } else {
+                    displayName = `${displayName} ${message.rankData.suffix}`;
+                }
+            } else {
+                authorStyle = 'color: #2A9FD6';
+                if (message.usernameColor) {
+                    displayName = `<span style="color: ${message.usernameColor}">${displayName}</span>`;
+                }
+            }
+            
+            const content = linkifyText(message.content);
+            
+            messageElement.innerHTML = `
+                <span class="chat-timestamp">${message.createdAt}</span>
+                <span class="author" style="${authorStyle}">${displayName}:</span>
+                <span class="content"><span>${content}</span></span>
+            `;
+            
+            messageElement.addEventListener('click', function(e) {
+                if (!e.target.closest('a')) {
+                    showMessageModal(message, e);
+                }
+            });
+        }
+        
+        chatMessages.appendChild(messageElement);
+        
+        const isNearBottom = chatMessages.scrollHeight - chatMessages.clientHeight - chatMessages.scrollTop < 100;
+        if (isNearBottom) {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    }
+
+    function linkifyText(text, isSystem = false) {
+        if (!isSystem) {
+            text = escapeHtml(text);
+        }
+
+        const urlPattern = /(https?:\/\/[^\s]+)|(?<![:/])((?:[\w-]+\.)+[\w-]+(?:\/[^\s]*)?)/g;
+        let processedText = text.replace(urlPattern, function(url, fullUrl, shortUrl) {
+            if (url.toLowerCase().endsWith('.gif')) {
+                return url;
+            }
+            
+            return `<a href="${url}" target="_blank" onclick="window.location.href='${url}'; return false;" style="color: #2A9FD6; text-decoration: none;">${url}</a>`;
+        });
+
+        if (window.authenticatedUsername) {
+            const mentionRegex = new RegExp(`(^|\\s)(@${window.authenticatedUsername})(?![^<]*>|[^<>]*<\/)`, 'gi');
+            processedText = processedText.replace(mentionRegex, '$1<span style="color: #2A9FD6 !important">$2</span>');
+        }
+
+        return processedText;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    async function deleteMessage(messageID) {
+        try {
+            const response = await fetch(`/api/deleteMessage?messageID=${messageID}`);
+            const data = await response.json();
+            if (data.success) {
+                const messageElement = document.querySelector(`[data-message-id="${messageID}"]`);
+                if (messageElement) {
+                    messageElement.replaceWith(messageElement.cloneNode(true));
+                    messageElement.remove();
+                }
+                const modal = document.getElementById('chatMessageModal');
+                modal.classList.remove('show');
+                selectedMessage = null;
+            } else {
+                console.error('Failed to delete message:', data.error);
+            }
+        } catch (error) {
+            console.error('Failed to delete message:', error);
+        }
+    }
+
+    function deleteSelectedMessage() {
+        if (selectedMessage) {
+            const messageId = selectedMessage.messageID;
+            selectedMessage = null;
+            deleteMessage(messageId);
+        }
+    }
+
+    function showMessageModal(message, event) {
+        const modal = document.getElementById('chatMessageModal');
+        const messageInfo = document.getElementById('chat-msg-info');
+        const chatBanBtn = document.getElementById('chatBanMessageBtn');
+        const copyMessageIdBtn = document.getElementById('chatCopyMessageIdBtn');
+        const visitProfileBtn = document.getElementById('chatVisitProfileBtn');
+        const deleteMessageBtn = document.getElementById('chatDeleteMessageBtn');
+        
+        let authorStyle = '';
+        let displayName = message.displayName;
+        
+        if (!window.isStaff || (message.userID === null)) {
+            chatBanBtn.style.display = 'none';
+        } else {
+            chatBanBtn.style.display = 'block';
+            selectedMessage = message;
+        }
+
+        if (message.userID === null) {
+            authorStyle = 'color: #ff0000; font-weight: bold;';
+            displayName = `${displayName} [System]`;
+            messageInfo.innerHTML = `
+                <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                    <span class="chat-timestamp">${message.createdAt}</span>
+                    <span class="author" style="${authorStyle}; margin: 0;">${displayName}:</span>
+                </div>
+                <div class="content" style="color: #fff; word-break: break-word; margin: 0;">${linkifyText(message.content, true)}</div>
+            `;
+            visitProfileBtn.style.display = 'none';
+        } else if (message.userID === null) {
+            authorStyle = 'color: #fff';
+            displayName = `${displayName} [Anonymous]`;
+            messageInfo.innerHTML = `
+                <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                    <span class="chat-timestamp">${message.createdAt}</span>
+                    <span class="author" style="${authorStyle}; margin: 0;">${displayName}:</span>
+                </div>
+                <div class="content" style="color: #fff; word-break: break-word; margin: 0;">${linkifyText(escapeHtml(message.content))}</div>
+            `;
+            visitProfileBtn.style.display = 'none';
+        } else {
+            if (message.rankData) {
+                authorStyle = message.rankData.rankStyle || '';
+                if (message.usernameColor) {
+                    displayName = `<span style="color: ${message.usernameColor}">${displayName}</span> ${message.rankData.suffix}`;
+                } else {
+                    displayName = `${displayName} ${message.rankData.suffix}`;
+                }
+            } else {
+                authorStyle = 'color: #2A9FD6';
+                if (message.usernameColor) {
+                    displayName = `<span style="color: ${message.usernameColor}">${displayName}</span>`;
+                }
+            }
+
+            messageInfo.innerHTML = `
+                <div style="margin-bottom: 10px; display: flex; align-items: center; gap: 5px;">
+                    <span class="chat-timestamp">${message.createdAt}</span>
+                    <span class="author" style="${authorStyle}; margin: 0;">${displayName}:</span>
+                </div>
+                <div class="content" style="color: #fff; word-break: break-word; margin: 0;">${linkifyText(escapeHtml(message.content))}</div>
+            `;
+            visitProfileBtn.style.display = 'block';
+            visitProfileBtn.textContent = 'View Profile';
+        }
+
+        modal.classList.add('show');
+        selectedMessage = message;
+
+        if (window.isStaff) {
+            deleteMessageBtn.style.display = 'block';
+        } else {
+            deleteMessageBtn.style.display = 'none';
+        }
+
+        copyMessageIdBtn.style.display = 'block';
+        copyMessageIdBtn.dataset.messageId = message.messageID;
+    }
+
+    function chatBanUser() {
+        if (!window.isStaff || !selectedMessage) return;
+        
+        const params = new URLSearchParams();
+        if (selectedMessage.userID !== null) {
+            params.append('userID', selectedMessage.userID);
+        }
+
+        fetch(`/api/chatBan?${params.toString()}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('chatMessageModal').classList.remove('show');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    function closeMessageModal(event) {
+        const modal = document.getElementById('chatMessageModal');
+        const modalContent = modal.querySelector('.chat-msg-modal-content');
+        if (!modalContent.contains(event.target)) {
+            modal.classList.remove('show');
+            selectedMessage = null;
+        }
+    }
+
+    function visitProfile() {
+        if (selectedMessage && selectedMessage.userID !== null) {
+            window.location.href = `/user/${selectedMessage.displayName}`;
+        }
+        document.getElementById('chatMessageModal').classList.remove('show');
+        selectedMessage = null;
+    }
+
+    function copyMessageId(messageId) {
+        navigator.clipboard.writeText(messageId);
+        const copyBtn = document.getElementById('chatCopyMessageIdBtn');
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => copyBtn.textContent = originalText, 1000);
+    }
+
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('chatMessageModal');
+        if (event.target === modal) {
+            closeMessageModal(event);
+        }
+    });
+
+    document.getElementById('chatTitle').addEventListener('click', async function() {
+        if (!window.isStaff) {
+            return;
+        }
+
+        const response = await fetch('/api/manageChat');
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('chatEnabledToggle').checked = data.settings.chatEnabled;
+            
+            document.getElementById('chatSettingsModal').classList.add('show');
+        }
+    });
+
+    document.getElementById('chatEnabledToggle').addEventListener('change', async function() {
+        const response = await fetch(`/api/manageChat?chatEnabled=${this.checked}`);
+        const data = await response.json();
+        if (!data.success) {
+            this.checked = !this.checked;
+        }
+    });
+
+    document.getElementById('chatSettingsModal').addEventListener('click', function(event) {
+        if (event.target === this) {
+            this.classList.remove('show');
+        }
+    });
+</script>
+#}
+
+<nav class="navbar">
+    <div class="container">
+        <div class="nav-brand">
+            <a href="/home" id="site-name">Vilebin</a>
+            <div class="online-count mobile-only" style="display: none;">0</div>
+        </div>
+        <button class="navbar-toggler" type="button">☰</button>
+        <div class="nav-wrapper">
+            <ul class="nav-menu">
+                <li class="{% if request.url.indexOf('/home') >= 0 %}active{% endif %}">
+                    <a href="/home">Home</a>
+                </li>
+                <li class="{% if request.url.indexOf('/upload') >= 0 %}active{% endif %}">
+                    <a href="/upload">Add Paste</a>
+                </li>
+                <li class="{% if request.url == '/users' or request.url.indexOf('/user/') == 0 %}active{% endif %}">
+                    <a href="/users">Users</a>
+                </li>
+                <li class="{% if request.url.indexOf('/upgrades') >= 0 %}active{% endif %}">
+                    <a href="/upgrades">Upgrades</a>
+                </li>
+                <li class="{% if request.url.indexOf('/hoa') >= 0 %}active{% endif %}">
+                    <a href="/hoa">Hall of Autism</a>
+                </li>
+                <li class="{% if request.url.indexOf('/support') >= 0 or request.url.indexOf('/tos') >= 0 %}active{% endif %}">
+                    <a href="/support">Support</a>
+                </li>
+                {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                <li class="admin-link {% if request.url.indexOf('/admin') >= 0 %}active{% endif %}">
+                    <a href="/admin" style="position: relative; display: inline-block;">
+                        Admin <span class="adminBadge" style="display: none;" id="notification-count-admin"></span>
+                    </a>
+                </li>
+                {% elif status == 'council' %}
+                <li class="{% if request.url.indexOf('/council') >= 0 %}active{% endif %}">
+                    <a href="/council" style="position: relative; display: inline-block;">
+                        Admin <span class="adminBadge" style="display: none;" id="notification-count-admin"></span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            {% if username %}
+            <div id="mobile-buttons" style="display: none;">
+                <ul class="nav-menu">
+                    <li class="{% if request.url.indexOf('/user/' ~ username) >= 0 %}active{% endif %}">
+                        <a href="/user/{{ username }}">Profile</a>
+                    </li>
+                    <li class="{% if request.url.indexOf('/settings') >= 0 %}active{% endif %}">
+                        <a href="/settings">Settings</a>
+                    </li>
+                    <li class="{% if request.url.indexOf('/logout') >= 0 %}active{% endif %}">
+                        <a href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+
+            <script>
+                function checkMobile() {
+                    var mobileButtons = document.getElementById('mobile-buttons');
+                    if (window.innerWidth <= 1000) {
+                        mobileButtons.style.display = 'block';
+                    } else {
+                        mobileButtons.style.display = 'none';
+                    }
+                }
+                window.addEventListener('load', checkMobile);
+                window.addEventListener('resize', checkMobile);
+            </script>
+            {% endif %}
+
+            <div class="online-count desktop-only" style="display: none;">0</div>
+            <div class="nav-auth">
+                {% if verify %}
+                <li><a href="/logout">Logout</a></li>
+                {% else %}
+                    {% if username %}
+                        {% if status != 'anonymous' %}
+                        <div class="notification-icon desktop-only" style="position: relative;">
+                            <a href="#" onclick="toggleNotifications(event)">
+                                <i class="fa-solid fa-bell"></i>
+                                <span id="notification-count" style="display: none; position: absolute; top: 8px; left: 8px; background-color: #ff0000; color: white; font-size: 10px; font-weight: bold; min-width: 14px; height: 14px; line-height: 14px; text-align: center; padding: 0 2px;"></span>
+                            </a>
+                            <div id="notification-dropdown" style="display: none; position: absolute; top: 100%; right: 0; width: 400px; max-height: 500px; background: #060606; border: 1px solid #282828; z-index: 1000; box-shadow: 0 2px 8px rgba(0,0,0,0.2); overflow: hidden;">
+                                <div style="padding: 8px 15px; border-bottom: 1px solid #282828;">
+                                    <span class="notification-message" style="color: #fff; font-weight: bold;">Notifications</span>
+                                </div>
+                                <div id="notifications-container" style="max-height: 400px; overflow-y: auto; background: #000000;">
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="desktop-only dropdown">
+                            <button class="dropdown-toggle">
+                                {% set s = styles.get(status, styles['user']) %}
+                                {% if status != 'anonymous' %}
+                                    <span style="{{ s.rankStyle }}">
+                                        <span style="color: {{ color }};">{{ username }}</span> {{ s.suffix }}
+                                    </span>
+                                {% else %}
+                                    <span style="color: {{ color }};">{{ username }}</span>
+                                {% endif %}
+                            </button>
+
+                            <div class="dropdown-menu">
+                                <a class="{% if request.url.indexOf('/user/' ~ username) >= 0 %}active{% endif %}" href="/user/{{ username }}">Profile</a>
+                                <a class="{% if request.url.indexOf('/settings') >= 0 %}active{% endif %}" href="/settings">Settings</a>
+                                <a class="{% if request.url.indexOf('/logout') >= 0 %}active{% endif %}" href="/logout">Logout</a>
+                            </div>
+                        </div>
+                    {% else %}
+                    <li class="{% if request.raw.url.startsWith('/login') >= 0 %}active{% endif %}">
+                        <a href="/login">Login</a>
+                    </li>
+
+                    <li class="{% if request.raw.url.startsWith('/register') >= 0 %}active{% endif %}">
+                        <a href="/register">Register</a>
+                    </li>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    const dropdown = document.querySelector('.dropdown');
+        if (dropdown) {
+            dropdown.querySelector('.dropdown-toggle').addEventListener('click', function(e) {
+                e.stopPropagation();
+                dropdown.classList.toggle('active');
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!dropdown.contains(e.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        }
+
+        document.querySelector('.navbar-toggler').addEventListener('click', function() {
+        document.querySelector('.nav-wrapper').classList.toggle('show');
+    });
+</script>
+
+{% if status in ['admin', 'founder', 'manager', 'mod', 'council'] %}
+<script>
+function updateAdminBadges() {
+    fetch('/api/int')
+        .then(res => res.json())
+        .then(data => {
+
+            const adminBadge = document.getElementById('notification-count-admin');
+
+            const badges = {
+                spam: document.getElementById('badge-spam'),
+                edits: document.getElementById('badge-edits'),
+                flags: document.getElementById('badge-flags'),
+                chat: document.getElementById('badge-chat')
+            };
+
+            const counts = {
+                spam: data.spam ?? 0,
+                edits: data.edits ?? 0,
+                flags: data.flags ?? 0,
+                chat: data.chat ?? 0
+            };
+
+            Object.keys(badges).forEach(key => {
+                const el = badges[key];
+                const count = counts[key];
+
+                if (!el) return;
+
+                if (count > 0) {
+                    el.textContent = count;
+                    el.style.display = "inline-block";
+                } else {
+                    el.style.display = "none";
+                }
+            });
+
+            const total =
+                counts.spam +
+                counts.edits +
+                counts.flags +
+                counts.chat;
+
+            if (adminBadge) {
+                if (total > 0) {
+                    adminBadge.textContent = total;
+                    adminBadge.style.display = "inline-block";
+                } else {
+                    adminBadge.style.display = "none";
+                }
+            }
+
+        })
+        .catch(() => {
+            [
+                'badge-spam',
+                'badge-edits',
+                'badge-flags',
+                'badge-chat',
+                'notification-count-admin'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = "none";
+            });
+        });
+
+}
+
+updateAdminBadges();
+setInterval(updateAdminBadges, 6000);
+</script>
+{% endif %}
+
+{% if status != 'anonymous' %}
+<script>
+    let currentNotifications = [];
+    let modalOpen = false;
+    let lastSeenTimestamp = 0;
+    let initialUnreadIds = new Set();
+    
+    function toggleNotifications(event) {
+        event.preventDefault();
+        const dropdown = document.getElementById('notification-dropdown');
+        modalOpen = !modalOpen;
+    
+        if (modalOpen) {
+            dropdown.style.display = 'block';
+            lastSeenTimestamp = Math.floor(Date.now() / 1000);
+    
+            fetch('/api/fetchNotifications?action=seen')
+                .then(response => response.json())
+                .then(data => {
+                    currentNotifications = data.notifications;
+    
+                    initialUnreadIds = new Set(
+                        currentNotifications
+                            .filter(n => n.status === 'unread')
+                            .map(n => n.createdAt)
+                    );
+    
+                    updateNotificationsDisplay();
+    
+                    const countElement = document.getElementById('notification-count');
+                    if (countElement) {
+                        countElement.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching notifications:', error);
+                });
+        } else {
+            dropdown.style.display = 'none';
+            lastSeenTimestamp = 0;
+            initialUnreadIds.clear();
+        }
+    }
+    
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('notification-dropdown');
+        const notificationIcon = document.querySelector('.notification-icon');
+    
+        if (modalOpen && !dropdown.contains(event.target) && !notificationIcon.contains(event.target)) {
+            modalOpen = false;
+            dropdown.style.display = 'none';
+            lastSeenTimestamp = 0;
+            initialUnreadIds.clear();
+        }
+    });
+    
+    function updateNotificationsDisplay() {
+        const container = document.getElementById('notifications-container');
+    
+        if (currentNotifications.length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 10px; color: #666;">No notifications.</div>';
+            return;
+        }
+    
+        container.innerHTML = currentNotifications.map(notification => {
+            const shouldHighlight = notification.status === 'unread';
+            const highlightClass = shouldHighlight ? 'notification-highlight' : '';
+            const textColor = notification.highlight ? '#ff0000' : 'green';
+
+            return `
+                <div class="${highlightClass}" style="padding: 8px 15px;">
+                    <span class="notification-message" style="color: ${textColor}">${notification.message}</span>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function updateNotificationCount() {
+        const url = modalOpen ? '/api/fetchNotifications?action=seen' : '/api/fetchNotifications';
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                currentNotifications = data.notifications;
+                const unreadCount = currentNotifications.filter(n => n.status === 'unread').length;
+                const countElement = document.getElementById('notification-count');
+    
+                if (unreadCount > 0) {
+                    countElement.style.display = 'block';
+                    countElement.textContent = unreadCount;
+                } else {
+                    countElement.style.display = 'none';
+                }
+    
+                if (modalOpen) {
+                    updateNotificationsDisplay();
+                }
+            })
+            .catch(error => console.error('Error fetching notifications:', error));
+    }
+    
+    if (document.querySelector('.notification-icon')) {
+        updateNotificationCount();
+        setInterval(updateNotificationCount, 7000);
+    }
+</script>
+{% endif %}
+<div id="notification" class="notification-container">
+    <div class="notification-header">
+        <div class="notification-title">Announcement</div>
+        <div class="notification-close">&times;</div>
+    </div>
+    <div class="notification-body" style="font-weight: bold;">
+        Subscribe a <a href="https://t.me/+wx6FDhUR_ntiZDVi" target="_blank" style="color: red;">telegram channel</a>.
+    </div>
+    <div class="notification-footer">
+        <button id="notificationOk" class="notification-btn primary">OK</button>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (!localStorage.getItem('notificationDismissed')) {
+            setTimeout(function () {
+                document.getElementById('notification').classList.add('show');
+            }, 2500);
+        }
+
+        const closeButtons = document.querySelectorAll('.notification-close, #notificationOk');
+        closeButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const notification = document.getElementById('notification');
+                notification.classList.remove('show');
+                localStorage.setItem('notificationDismissed', true);
+
+                setTimeout(function () {
+                    notification.style.display = 'none';
+                }, 300);
+            });
+        });
+    });
+</script>
+{% block bottom %}
+{% endblock %}

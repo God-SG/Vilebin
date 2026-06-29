@@ -1,0 +1,138 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Login | Vilebin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+</head>
+    <style>
+        .login-container {
+            max-width: 500px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .login-container h1 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .login-description {
+            color: #fff;
+            font-size: 13.5px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #888;
+            margin-bottom: 8px;
+            font-size: 13.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            background: #282828;
+            border: 1px solid #282828;
+            color: #fff;
+            font-size: 13.5px;
+            box-sizing: border-box;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 8px;
+            background: #282828;
+            border: 1px solid #282828;
+            color: #fff;
+            font-size: 13.5px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-sizing: border-box;
+            transition: background-color 0.2s;
+        }
+
+        .login-button:hover {
+            background: #3D3D3D;
+        }
+
+        .error-message {
+            color: #ff0000;
+            font-size: 13.5px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+
+        .help-text {
+            color: #888;
+            font-size: 13.5px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        input {
+            outline: none;
+        }
+        
+        input:focus {
+            outline: none;
+        }
+    </style>
+
+    <div class="login-container">
+        <h1>Two Factor Auth</h1>
+        <div class="login-description">Enter your 2FA code to login:</div>
+        <form id="loginTwoForm" onsubmit="handleTwoFactorAuth(event)">
+            <div class="form-group">
+                <input type="text" id="code" name="code" class="form-input" placeholder="2FA Code" required>
+            </div>
+
+            <button type="submit" class="login-button">Login</button>
+            <div id="errorMessage" class="error-message"></div>
+        </form>
+        <div class="help-text">Staff can't unlock your account for you if you've lost access your app.</div>
+    </div>
+
+    <script>
+        async function handleTwoFactorAuth(event) {
+            event.preventDefault();
+            
+            const code = document.getElementById('code').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const loginButton = document.querySelector('.login-button');
+            
+            try {
+                loginButton.disabled = true;
+                const response = await fetch(`/api/auth/two?otp=${encodeURIComponent(code)}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    errorMessage.textContent = data.error || 'Invalid 2FA code';
+                    errorMessage.style.display = 'block';
+                    loginButton.disabled = false;
+                }
+            } catch (error) {
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
+{% endblock %}

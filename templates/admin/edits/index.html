@@ -1,0 +1,101 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!doctype html>
+<html lang="en">
+<head>
+    <style>
+        .main-container {
+            margin-left: 260px;
+            color: #fff;
+            padding: 20px;
+        }
+        .flags-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .flags-table th,
+        .flags-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+            height: 20px;
+            line-height: 20px;
+        }
+        
+        .flags-table th {
+            background: #212121;
+            font-weight: bold;
+        }
+        
+        .paste-link {
+            color: #2A9FD6 !important;
+            text-decoration: none;
+        }
+        
+        .paste-link:hover {
+            text-decoration: underline;
+        }
+        
+        .system-reporter {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        
+        .flags-table td a {
+            text-decoration: none;
+        }
+        
+        .flags-table td a:hover {
+            text-decoration: underline;
+        }
+        
+        .truncate {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+{% include 'admin/navbar.html' %}
+
+<main class="main-container">
+    <table class="flags-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Edited At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for edit in edits %}
+                <tr>
+                    <td>
+                        <a href="/admin/edits/{{ edit.id }}" class="paste-link">{{ edit.pastname }}</a>
+                    </td>
+                    <td>
+                        {% set s = styles.get(edit.ownerstatus, styles['user']) %}
+                        <a href="/user/{{ edit.owner }}" target="_blank" style="{{ s.rankStyle }} text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                            <span style="color: {{ edit.ownercolor }};">{{ edit.owner }}</span>
+                            {% if s.suffix %} {{ s.suffix }}{% endif %}
+                        </a>
+                    </td>
+                    <td>{{ edit.date }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</main>
+
+</body>
+</html>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="data:,">
+    <title>Tos | Vilebin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<style>
+    .main-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 0 20px;
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            margin: 10px auto;
+            padding: 0 5px;
+            max-width: 100%;
+        }
+    }
+
+    .contact-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        color: #fff;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+    }
+
+    .contact-item {
+        margin-bottom: 10px;
+        color: #fff;
+        font-size: .98rem;
+        line-height: 1.5;
+    }
+
+	.contact-item ul {
+		padding-left: 0;
+		margin-left: 0;
+		list-style-position: inside;
+	}
+
+    .contact-link {
+        color: red;
+		font-weight: bold;
+        text-decoration: none;
+    }
+
+    .contact-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<body>
+    <main>
+		<div class="main-container">
+			<div class="contact-section">
+				<h2 class="section-title">Content Guidelines</h2>
+				<div class="contact-item">
+					Vilebin provides a platform for users to upload text information without fear of censorship. All content hosted on Vilebin is subject to removal under certain conditions, including but not limited to, violations of this policy or the issuance of a court order in accordance with the applicable laws where Vilebin operates. Vilebin reserves the right, at its sole discretion, to remove any content from the platform for any reason, including but not limited to violations of this policy.
+				</div>
+				<div class="contact-item">
+					The following content is prohibited on our platform:
+					<ul>
+						<li>Personal information of individuals under the age of 15</li>
+						<li>Links to explicit material involving minors</li>
+						<li>Dox requests or any form of targeted harassment</li>
+						<li>Spam or malicious content</li>
+						<li>Direct threats of physical harm, terrorism, or swatting</li>
+						<li>Reposting identical or low quality content</li>
+					</ul>
+				</div>
+				<div class="contact-item">
+					To report violations of this policy, please contact us via Telegram at <a href="https://t.me/vilebinceo" class="contact-link" target="_blank">t.me/joker</a>. Law enforcement inquiries and abuse must be directed to <a href="mailto:legal@vilebin.cx" class="contact-link">legal@vilebin.cx</a> in accordance with our <a href="/support" class="contact-link">Law Enforcement Request Guidelines</a>. All emails received from anyone other than authorized law enforcement officials or attorneys representing law enforcement agencies will be directed to our Telegram support.
+				</div>
+			</div>
+
+			<div class="contact-section">
+				<h2 class="section-title">User Responsibilities</h2>
+				<div class="contact-item">
+					Users who upload content to Vilebin retain ownership of the materials they submit, and are solely responsible for ensuring that such content does not violate this policy or applicable laws. By using Vilebin, users acknowledge that they understand and agree to comply with this policy. Any content uploaded in violation of this policy will be subject to removal with prejudice.
+				</div>
+			</div>
+
+			<div class="contact-section">
+				<h2 class="section-title">Legal</h2>
+				<div class="contact-item">
+					Vilebin and its administrators adhere to all applicable laws within the jurisdictions in which the platform operates. Vilebin assumes no responsibility for the content uploaded by its users.
+				</div>
+				<div class="contact-item">
+					<ul>
+						<li>Vilebin cannot be held liable for any content uploaded by users in adherence to <a href="https://en.wikipedia.org/wiki/Section_230" target="_blank" class="contact-link">Section 230 of the Communications Act of 1934</a>, which provides immunity from liability for user-generated content published by third parties.</li>
+						<li>The platform does not endorse, participate in, or facilitate any form of harassment, cyberbullying, or threats of violence.</li>
+						<li>Any content that directly threatens, incites harm, or is in violation of applicable law will be removed immediately upon review.</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</main>
+</body>
+</html>
+{% endblock %}
+
+{% block bottom %}
+{% endblock %}

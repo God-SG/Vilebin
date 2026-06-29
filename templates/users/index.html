@@ -1,0 +1,355 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Users | Vilebin</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/locale/ru.min.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        @media screen and (min-width: 769px) {
+            .content {
+                width: 50%;
+                max-width: 800px;
+                margin: 60px auto;
+            }
+
+            {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+            .actions-col {
+                width: 10%;
+                text-align: center !important;
+                color: #ff0000;
+            }
+
+            /* Adjust other column widths when Actions is present */
+            
+            td:first-child,
+            th:first-child {
+                width: 8%;
+            }
+            
+            td:nth-child(2),
+            th:nth-child(2) {
+                width: 22%;
+            }
+            
+            td:nth-child(3),
+            th:nth-child(3),
+            td:nth-child(4),
+            th:nth-child(4) {
+                width: 10%;
+            }
+            
+            td:nth-child(5),
+            th:nth-child(5) {
+                width: 12%;
+            }
+            {% endif %}
+        }
+        
+        @media screen and (max-width: 768px) {
+            .content {
+                width: 100% !important;
+                max-width: none !important;
+                margin: 40px 0 !important;
+                padding: 0 10px;
+                box-sizing: border-box;
+            }
+            
+            .rank-section {
+                width: 100%;
+                margin: 20px 0;
+            }
+            
+            table {
+                font-size: 12px;
+                table-layout: fixed;
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Hide Pastes, Comments, and Actions columns on mobile */
+            th:nth-child(3),
+            td:nth-child(3),
+            th:nth-child(4),
+            td:nth-child(4),
+            .actions-col {
+                display: none;
+            }
+            
+            td, th {
+                padding: 6px 4px;
+                box-sizing: border-box;
+            }
+            
+            td:first-child,
+            th:first-child {
+                width: 40%;
+                max-width: none;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            td:first-child a {
+                display: block;
+                width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            td:nth-child(2),
+            th:nth-child(2) {
+                width: 35%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            
+            td:nth-child(5),
+            th:nth-child(5) {
+                width: 25%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+
+        .content {
+            color: white;
+            padding-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 25px;
+            margin-bottom: 20px;
+            font-weight: normal;
+            color: white;
+        }
+
+        .search-container {
+            text-align: center;
+            margin: 10px 0 0 0;
+        }
+
+        .search-form {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .search-box {
+            background: #282828;
+            border: none;
+            outline: none;
+            color: white;
+            padding: 5px 10px;
+            width: 240px;
+            height: 32px;
+            box-sizing: border-box;
+        }
+
+        .search-box::placeholder {
+            color: #878787;
+        }
+
+        .search-box:focus {
+            outline: none;
+        }
+
+        .search-button {
+            background: #282828;
+            color: white;
+            border: none;
+            padding: 5px 15px;
+            cursor: pointer;
+            height: 32px;
+            box-sizing: border-box;
+            font-size: 13px;
+        }
+
+        .showing-text {
+            text-align: center;
+            font-size: 13px;
+            margin: 10px 0;
+            color: #878787;
+        }
+
+        .rank-section {
+            margin-bottom: 25px;
+        }
+
+        .rank-section h2 {
+            color: white;
+            margin: 10px 0;
+            padding: 0;
+            font-weight: normal;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #080808;
+            font-size: 14px;
+        }
+
+        th {
+            padding: 8px;
+            text-align: left;
+            background: #181818;
+            font-weight: bold;
+            border: none;
+            border-bottom: 1px solid #333;
+        }
+
+        th:not(:first-child):not(:nth-child(2)) {
+            text-align: center;
+        }
+
+        td {
+            padding: 9px;
+            border: none;
+            border-bottom: 1px solid #333;
+        }
+
+        td:not(:first-child):not(:nth-child(2)) {
+            text-align: center;
+        }
+
+        tr {
+            background: #080808;
+        }
+
+        tr:nth-child(even) {
+            background: #181818;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        /* Column widths */
+        td:first-child,
+        th:first-child {
+            width: 8%;
+        }
+
+        td:nth-child(2),
+        th:nth-child(2) {
+            width: 25%;
+            text-align: left;
+        }
+
+        td:nth-child(3),
+        th:nth-child(3),
+        td:nth-child(4),
+        th:nth-child(4) {
+            width: 10%;
+        }
+
+        td:nth-child(5),
+        th:nth-child(5) {
+            width: 12%;
+        }
+    </style>
+</head>
+<body class="bin" style="margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;">
+    {% endblock %}
+
+    {% block bottom %}
+    <div class="content">
+        <h1>Users</h1>
+
+        <div class="search-container">
+            <div id="error-msg" class="error-message"></div>
+            <form id="search-form" class="search-form" action="/users" method="POST">
+                <input id="search-query" name="search_query" type="text" class="search-box" placeholder="Username..." maxlength="20">
+                <button type="submit" class="search-button">Search</button>
+            </form>
+        </div>
+        <p class="showing-text">Showing 100 (of {{ all_users }}) users</p>
+
+        {% set ranks = [
+            {'name': 'Admin', 'users': admin_users, 'default_color': '#ff0000', 'bg': 'red.gif'},
+            {'name': 'Manager', 'users': manager_users, 'default_color': '#bb71e4', 'bg': 'purple.gif'},
+            {'name': 'Mod', 'users': mod_users, 'default_color': '#08f008', 'bg': None},
+            {'name': 'Council', 'users': council_users, 'default_color': '#87cefa', 'bg': None},
+            {'name': 'Clique', 'users': clique_users, 'default_color': '#09569E', 'bg': None},
+            {'name': 'Rich', 'users': rich_users, 'default_color': '#FFD700', 'bg': 'gold.gif'},
+            {'name': 'Criminal', 'users': criminal_users, 'default_color': '#780A48', 'bg': None},
+            {'name': 'VIP', 'users': vip_users, 'default_color': '#9B318E', 'bg': None},
+            {'name': 'Users', 'users': regular_users, 'default_color': '#2a9fd6', 'bg': None}
+        ] %}
+
+        {% for rank in ranks %}
+        <div class="rank-section">
+            <h2>{{ rank.name }}</h2>
+            <table class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Pastes</th>
+                        <th>Comments</th>
+                        <th>Joined</th>
+                        {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                        <th class="actions-col">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if rank.users %}
+                        {% for user in rank.users %}
+                        <tr>
+                            <td>{{ user['id'] }}</td>
+                            <td>
+                                <a class="dox-username" href="/user/{{ user['username'] }}" style="color: {{ user[20] or rank.default_color }}; font-weight: bold; {% if rank.bg %}background-image: url('/static/{{ rank.bg }}');{% endif %}">
+                                    <span style="color: {{ user['color'] }}; text-decoration: underline;">{{ user['username'] }}</span>
+                                </a>
+                            </td>
+                            <td>{{ pastes_dict[user['username']] or 0 }}</td>
+                            <td>{{ comments_dict[user['username']] or 0 }}</td>
+                            <td>{{ user['formatted_date'] }}</td>
+                            {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                                <td class="actions-col"><a href="/admin/users/{{ user['username'] }}" style="color: #ff0000;">Manage</a></td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" style="text-align: center;">
+                                <span style="font-weight: bold;">No users found in this rank.</span>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var usernameInput = document.getElementById('search-query');
+
+        usernameInput.addEventListener('input', function () {
+            var value = usernameInput.value;
+            usernameInput.value = value.replace(/[^a-zA-Z0-9]/g, '');
+        });
+    });
+</script>
+</html>
+{% endblock %}

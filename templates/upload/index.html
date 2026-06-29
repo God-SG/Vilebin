@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="data:,">
+    <title>{{ pastname }} | Vilebin</title>
+
+    <link rel="stylesheet" href="/static/nav.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="{{ pastname }} - Paste created by {{ owner.login }} on {{ formatted_date }}">
+    <meta name="keywords" content="Vilebin, vilebin, Ghostbin, ghostbin, Darkbin, darkbin, Doxbin, doxbin, pastebin, {{ pastname }}, vilebin paste, ghostbin paste, darkbin paste, doxbin paste, file sharing, privacy, anonymous sharing, {{ formatted_date }}">
+</head>
+
+<body class="bin" style="margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;">
+    <style>
+        .paste-container {
+            display: flex;
+            flex: 1;
+        }
+        .content-area {
+            flex: 1;
+            background: #0C0C0C;
+            position: relative;
+            padding-bottom: 10px;
+			min-height: fit-content;
+        }
+        .content-area pre {
+            width: 100%;
+            height 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: monospace;
+            font-size: 13px;
+            padding: 10px 20px;
+            margin: 0;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        @media screen and (max-width: 768px) {
+            .content-area pre {
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
+        .content-area pre a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .content-area pre a:hover {
+            text-decoration: underline;
+        }
+        .sidebar {
+            width: 280px;
+            background: #181818;
+            padding: 10px 12px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            transition: transform 0.3s ease;
+            text-align: center;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+        .sidebar.hidden {
+            transform: translateX(100%);
+        }
+        .toggle-sidebar {
+            position: fixed;
+            right: 304px;
+            top: 0;
+            background: #181818;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1000;
+            padding: 6px 10px;
+            border-radius: 0;
+            transition: right 0.3s ease;
+        }
+        .toggle-sidebar:hover {
+            background: #222;
+        }
+        .sidebar.hidden ~ .toggle-sidebar {
+            right: 24px;
+        }
+        a {
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .ascii-art {
+            color: #fff;
+            font-family: monospace;
+            white-space: pre;
+            font-size: 8px;
+            line-height: 1.2;
+            margin-bottom: 10px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .form-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 5px;
+            font-size: 13px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 256px;
+            background: #545454;
+            border: 1px solid #282828;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 13px;
+            border-radius: 3px;
+        }
+        .form-group input::placeholder {
+            color: #bfbfbf;
+        }
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus {
+            outline: none;
+        }
+        .visibility-options {
+            margin: 15px 0;
+            color: #fff;
+            text-align: left;
+        }
+        .visibility-options label {
+            display: block;
+            margin-bottom: 8px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .visibility-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            padding: 0 2px;
+        }
+        .visibility-option label {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+        input[type="radio"] {
+            margin: 0;
+        }
+        input[type="radio"]:checked {
+            accent-color: #ff0000;
+        }
+        .username-field {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .username-field span {
+            color: #fff;
+            font-size: 13px;
+        }
+        .username-field a {
+            color: #888;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .username-field a:hover {
+            text-decoration: underline;
+        }
+        .info-group {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .info-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 5px;
+            font-size: 13px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .info-group .value {
+            color: #bababa;
+            font-size: 13px;
+            text-align: right;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        .button {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 3px;
+            margin-bottom: 1px;
+            transition: all 0.2s;
+        }
+        .button:hover {
+            background: #666;
+        }
+        .admin-button {
+            background: #753B3B !important;
+            border-color: #4D2727 !important;
+        }
+        .admin-button:hover {
+            background: #4D2727 !important;
+        }
+        .comment-input-section {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        .comment-input {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 0;
+            font-size: 13px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+            resize: vertical;
+            min-height: 60px;
+            font-family: inherit;
+            box-sizing: border-box;
+            padding-left: 8px;
+            padding-right: 8px;
+        }
+        .comment-input::placeholder {
+            color: #ccc;
+        }
+        .comment-input:focus {
+            outline: none;
+            border-color: #666;
+        }
+        .tos-note {
+            color: #fff;
+            font-size: 13px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .tos-note a {
+            color: #888;
+            text-decoration: none;
+        }
+        .tos-note a:hover {
+            text-decoration: underline;
+        }
+        .separator {
+            border-top: 2px solid #747474;
+            margin: 15px 0;
+        }
+        *:focus {
+            outline: none !important;
+        }
+        .cf-turnstile {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: center;
+        }
+        .sidebar a {
+            color: #888;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            color: #ff0000;
+            margin: 10px 0;
+            font-size: 13px;
+            text-align: center;
+        }
+        .comments-section {
+            text-align: left;
+            margin-top: 15px;
+        }
+        .comment {
+            margin-bottom: 10px;
+            text-align: left;
+            color: #fff;
+            font-size: 13px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #808080;
+        }
+        .comment-meta {
+            color: #888;
+            margin-bottom: 3px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .hide-show-link {
+            color: #ff0000 !important;
+            cursor: pointer;
+            text-decoration: none;
+            margin-left: auto;
+        }
+        .hide-show-link:hover {
+            text-decoration: underline;
+            color: #ff0000 !important;
+        }
+        .comment-meta a {
+            text-decoration: none;
+            color: #fff;
+        }
+        .comment-meta a:hover {
+            text-decoration: underline;
+        }
+        .comment-content {
+            color: #fff;
+            font-size: 13px;
+            overflow-wrap: break-word;
+            word-break: break-all;
+            -webkit-hyphens: auto;
+            -ms-hyphens: auto;
+            hyphens: auto;
+        }
+        .reaction-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 5px 0;
+            justify-content: flex-start;
+        }
+        .reaction-button {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .reaction-button:hover {
+            color: #ccc;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal[style*="display: block"],
+        .modal[style*="display: flex"] {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #111;
+            padding: 20px;
+            border: 1px solid #333;
+            position: relative;
+            color: #fff;
+        }
+        .modal-close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+        .modal-close:hover {
+            color: #fff;
+        }
+        input[type="checkbox"]:checked {
+            accent-color: #ff0000;
+        }
+        select, textarea {
+            width: 100%;
+            background: #282828;
+            border: 0;
+            border-radius: 2px;
+            color: white;
+            padding: 7px 5px;
+            margin-bottom: 10px;
+            font-size: inherit;
+            font-family: inherit;
+            outline: none;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 60px;
+            resize: none;
+        }
+        button {
+            background: #222;
+            color: #fff;
+            border: 1px solid #333;
+            padding: 8px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: inherit;
+            font-family: inherit;
+        }
+        button:hover {
+            background: #282828;
+            border-color: #444;
+        }
+        .checkbox-container {
+            margin-bottom: 15px;
+        }
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 5px;
+        }
+        .checkbox-container label {
+            color: #fff;
+            font-size: inherit;
+        }
+        .settings-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .settings-icon:hover {
+            opacity: 1;
+        }
+        .sidebar-content {
+            display: block;
+        }
+        .sidebar-content.hidden {
+            display: none;
+        }
+        .settings-content {
+            display: none;
+        }
+        .settings-content.visible {
+            display: block;
+        }
+        .info-row .visibility-icon {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-right: 5px;
+        }
+
+        input {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        *:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        input, textarea, select {
+            font-size: 16px !important;
+        }
+
+        .button.disabled {
+            background: #A0A0A0 !important;
+            color: #fff !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+        }
+
+        /* NEW YEAR */
+        .snowflake {
+            user-select: none !important;
+            pointer-events: none !important;
+        }
+    </style>
+
+    <div class="paste-container">
+        <div class="content-area">
+            {% if owner.login == 'HOA' %}
+            <pre>{{ content | safe }}</pre>
+            {% else %}
+            <pre>{{ content }}</pre>
+            {% endif %}
+        </div>
+        <button class="toggle-sidebar">☰</button>
+        <div class="sidebar">
+            {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich', 'criminal'] and username|lower == owner.login|lower or status in ['admin', 'founder', 'manager', 'mod'] %}
+            <i class="fas fa-cog settings-icon"></i>
+            {% endif %}
+            
+            <a href="/" style="text-decoration: none;"><div class="ascii-art" style="text-decoration: none; font-size: 13px; line-height: 1.1;">__      ___ _      _     _       
+\ \    / (_) |    | |   (_)      
+ \ \  / / _| | ___| |__  _ _ __  
+  \ \/ / | | |/ _ \ '_ \| | '_ \ 
+   \  /  | | |  __/ |_) | | | | |
+    \/   |_|_|\___|_.__/|_|_| |_|</div></a>
+			
+            {% if status in ['admin', 'founder', 'manager', 'mod', 'council'] %}
+            <div style="display: flex; justify-content: space-between; gap: 10px; margin: 10px 0;">
+                {% if prev_paste %}
+                    <a href="/upload/{{ prev_paste | replace(' ', '') }}" style="flex: 1; text-align: center; padding: 4px 8px; background-color: #753B3B; color: white; font-size: 12px; text-decoration: none; cursor: pointer;">Previous</a>
+                {% else %}
+                    <span style="flex: 1; text-align: center; padding: 4px 8px; background-color: #753B3B; color: white; font-size: 12px; opacity: 0.5; text-decoration: none; cursor: not-allowed;">Previous</span>
+                {% endif %}
+                
+                {% if next_paste %}
+                    <a href="/upload/{{ next_paste | replace(' ', '') }}" style="flex: 1; text-align: center; padding: 4px 8px; background-color: #753B3B; color: white; font-size: 12px; text-decoration: none; cursor: pointer;">Next</a>
+                {% else %}
+                    <span style="flex: 1; text-align: center; padding: 4px 8px; background-color: #753B3B; color: white; font-size: 12px; opacity: 0.5; text-decoration: none; cursor: not-allowed;">Next</span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+            <div style="margin-top: 0;">
+                <button class="button" style="background: {% if not activeMemo %}#753B3B{% else %}red{% endif %}; font-weight: bold; margin-bottom: 10px;" onclick="{% if not activeMemo %}showStaffMemoModal(){% else %}showViewStaffMemosModal(){% endif %};">{% if not activeMemo %}ADD STAFF NOTE{% else %}VIEW STAFF NOTES{% endif %}</span>
+            </div>
+            {% endif %}
+
+            <div class="info-group">
+                <div class="info-row">
+                    <label>Title:</label>
+                    <span class="value">
+                        {% if is_pinned %}
+                        <i class="fas fa-thumbtack visibility-icon"></i>
+                        {% endif %}
+
+                        {% if type == 'unlisted' %}
+                        <i class="fas fa-eye-slash visibility-icon"></i>
+                        {% endif %}
+                        {% if type == 'private' %}
+                        <i class="fas fa-shield-alt visibility-icon"></i>
+                        {% endif %}
+
+                        {% if password %}
+                        <i class="fas fa-lock visibility-icon"></i>
+                        {% endif %}
+                        {{ pastname }}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <label>Created:</label>
+                    <span class="value">
+                        {{ formatted_date }}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <label>Author:</label>
+                    <span class="value">
+                        {% set s = styles.get(owner.status, styles['user']) %}
+                        {% if owner.status == 'anonymous' %}
+                            <span style="float: right;">
+                                {{ owner.login }}
+                            </span>
+                        {% else %}
+                            <a href="/user/{{ owner.login }}" style="float: right; {{ s.rankStyle }}">
+                                <span style="color: {{ owner.color }};">{{ owner.login }}</span>
+                                {% if s.suffix %} {{ s.suffix }}{% endif %}
+                            </a>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="info-row">
+                    <label>Views:</label>
+                    <span class="value">
+                        {{ views }}
+                    </span>
+                </div>
+
+                {% if commentsstatus %}
+                <div class="info-row">
+                    <label>Comments:</label>
+                    <span class="value comment-count">
+                        {{ comments|length }}
+                    </span>
+                </div>
+                {% endif %}
+
+                <div class="reaction-buttons">
+                    <button class="reaction-button"><i class="fas fa-thumbs-up"></i> {{ likes }}</button>
+                    <button class="reaction-button"><i class="fas fa-thumbs-down"></i> {{ dislikes }}</button>
+                </div>
+            </div>
+
+			<div class="separator"></div>
+
+            <div class="sidebar-content">
+                {% if not edit and owner.login == username %}
+                    {% if is_edit %}
+                    <button class="button" style="background: #557C51 !important" onclick="window.location.href='/upload/{{ pastname_c }}/edit'">Edit Paste</button>
+                    {% else %}
+                    <button class="button disabled" style="background: #476344 !important">Edit Paste</button>
+                    {% endif %}
+                {% endif %}
+
+                <div style="height: 5px"></div>
+                
+                <button class="button" onclick="window.location.href='/upload'">New (N)</button>
+                <div style="height: 5px"></div>
+                <button class="button" onclick="window.open('/upload/{{ pastname_c }}/raw{% if password %}?password={{ password | urlencode }}{% endif %}', '_blank')">Raw (R)</button>
+                
+                <div class="separator"></div>
+
+                <button class="button" onclick="window.location.href='mailto:legal@vilebin.cx'">
+                    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 512 512" class="mr-2 inline" height="1em" width="1em" xmlns="https://www.w3.org/2000/svg"><path d="M349.565 98.783C295.978 98.783 251.721 64 184.348 64c-24.955 0-47.309 4.384-68.045 12.013a55.947 55.947 0 0 0 3.586-23.562C118.117 24.015 94.806 1.206 66.338.048 34.345-1.254 8 24.296 8 56c0 19.026 9.497 35.825 24 45.945V488c0 13.255 10.745 24 24 24h16c13.255 0 24-10.745 24-24v-94.4c28.311-12.064 63.582-22.122 114.435-22.122 53.588 0 97.844 34.783 165.217 34.783 48.169 0 86.667-16.294 122.505-40.858C506.84 359.452 512 349.571 512 339.045v-243.1c0-23.393-24.269-38.87-45.485-29.016-34.338 15.948-76.454 31.854-116.95 31.854z"></path></svg>
+                    Report
+                </button>
+
+                {% if status in ['admin', 'founder', 'manager', 'mod', 'council'] %}                    
+                    {% if not flag and status == 'council' %}
+                        <div class="separator"></div>
+
+                        <button class="button admin-button" onclick="showFlagModal()">Flag Paste</button>
+                    {% endif %}
+
+                    {% if flag %}
+                        <div class="separator"></div>
+
+                        <div style="text-align: left;">
+                            <label style="color: white; font-size: 13px; font-weight: bold;">Flagged by <a href="/user/{{ flag.reporter }}" style="color:#87cefa; font-weight:bold;"><span style="color: {{ flag.reportercolor }};">{{ flag.reporter }}</span> [Council]</a></label>
+                        </div>
+
+                        <div style="text-align: left;">
+                            <label style="color: white; font-size: 13px; font-weight: bold;">Reason:</label>
+                            <span style="color: white; font-size: 13px;">{{ flag.reason }}</span>
+                        </div>
+
+                        {% if flag.reporter == username and status == 'council' %}
+                            <button class="button admin-button" style="margin-top: 5px" onclick="fetch('/api/cancelFlag?flagID={{ id }}').then(r=>r.json()).then(d=>{if(d.success)location.reload()})">Cancel Flag</button>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+                {% if status in ['admin', 'founder', 'manager', 'mod'] and not flag and delete and seal  %}
+                    <div class="separator"></div>
+
+                    <div style="text-align: left;">
+                        <label style="color: white; font-size: 13px; font-weight: bold;">Date:</label>
+                        <span style="color: white; font-size: 13px;">{{ seal.time }}</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <label style="color: white; font-size: 13px; font-weight: bold;">Staff:</label>
+                        <span style="color: white; font-size: 13px;">{{ seal.by }}{% if seal.flag and seal.flag.by %} (flag by - {{ seal.flag.by }}){% endif %}</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <label style="color: white; font-size: 13px; font-weight: bold;">Reason:</label>
+                        <span style="color: white; font-size: 13px;">{{ seal.reason }}</span>
+                    </div>
+                    <div style="text-align: left;">
+                        <label style="color: white; font-size: 13px; font-weight: bold;">Silent:</label>
+                        <span style="color: white; font-size: 13px;">{{ seal.silent }}</span>
+                    </div>
+                {% endif %}
+
+                {% if status not in ['admin', 'founder', 'manager', 'mod', 'council'] %}
+                <div class="separator"></div>
+                {% endif %}
+
+                {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                <div class="separator"></div>
+                {% endif %}
+
+                {% if status in ['admin', 'founder', 'manager'] %}
+                    <form action="/toggle_pinned/{{ pastname_c }}" method="POST" onsubmit="return confirm('Are you sure you want to toggle the pinned status?');">
+                        <button type="submit" class="button admin-button">{{ 'Unpin' if is_pinned else 'Pin' }}</button>
+                    </form>
+                {% endif %}
+
+                {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                    {% if delete %}
+                        <button type="submit" class="button admin-button" onclick="showUnsealModal('{{ id }}', this)">Unseal</button>
+                    {% else %}
+                        <button type="submit" class="button admin-button" onclick="showHideModal('{{ id }}', this)">Seal</button>
+                    {% endif %}
+                {% endif %}
+
+                {% if status in ['admin', 'founder'] and username in ['Admin', 'founder'] %}
+                    <form action="/full_seal/{{ pastname_c }}" method="POST" onsubmit="return confirm('Are you sure you want to full seal paste?');">
+                        <button type="submit" class="button admin-button">Full Seal Paste</button>
+                    </form>
+                {% endif %}
+
+                {% if status in ['admin', 'founder', 'manager'] %}
+                    <form action="/toggle_comments/{{ pastname_c }}" method="POST" onsubmit="return confirm('Are you sure you want to toggle comment status?');">
+                        <button type="submit" class="button admin-button">{{ 'Disable' if commentsstatus else 'Enable' }} Comments</button>
+                    </form>
+                {% endif %}
+
+                {% if status in ['admin', 'founder', 'manager'] %}
+                    <form action="/toggle_edit/{{ pastname_c }}" method="POST" onsubmit="return confirm('Are you sure you want to toggle edit status?');">
+                        <button type="submit" class="button admin-button">{{ 'Disable' if is_edit else 'Enable' }} Edits</button>
+                    </form>
+                {% endif %}
+                
+                {% if status in ['admin', 'founder'] %}
+                    <button class="button admin-button" onclick="showChangeViewsModal()">Change Views</button>
+                {% endif %}
+
+                {% if status in ['admin', 'founder', 'manager', 'mod', 'council'] %}
+                <div class="separator"></div>
+                {% endif %}
+                
+                {% if edit and username|lower == owner.login|lower %}
+
+                <label style="color: white; font-size: 13px; font-weight: bold;">You sent request to edit this paste, if you need cancel it -  click to button.</label>
+                
+                <br><br>
+
+                <button class="button admin-button" onclick="window.location.href='/upload/{{ pastname_c }}/canceledit'">Cancel Edit</button>
+                
+                <div class="separator"></div>
+                {% endif %}
+
+                {% if commentsstatus %}
+                    <div class="comment-input-section">
+                        <div id="comment-error" style="color: red; margin-bottom: 10px; font-size: 12px;">{% if error %}{{ error }}{% endif %}</div>
+                        <form id="comment-form" action="/upload/{{ pastname_c }}/add_comment{% if password %}?password={{ password | urlencode }}{% endif %}" method="post">
+                            <textarea id="comment-input" name="comment" class="comment-input" placeholder="Add a comment..." maxlength="100" required></textarea>
+                            
+                            <div class="cf-turnstile" data-theme="dark" data-sitekey="0x4AAAAAAC3WTrckRnu_OvfY"></div>
+                            
+                            <button id="submit-comment" class="button">Submit Comment</button>
+                        </form>
+                    </div>
+
+                    <div class="separator"></div>
+
+                    <div class="comments-section">
+                        <div id="comments-container">
+                            {% if comments %}
+                                {% for comment in comments %}
+                                    <div class="comment" data-comment-id="{{ loop.index }}">
+                                        <div class="comment-meta">
+                                            <span>
+                                                {% set s = styles.get(comment.loginstatus, styles['user']) %}
+                                                {% if comment.loginstatus != 'anonymous' %}
+                                                    <a href="/user/{{ comment.login }}" target="_blank" style="{{ s.rankStyle }} text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                                        <span style="color: {{ comment.logincolor }}">{{ comment.login }}</span> {{ s.suffix }}
+                                                    </a>
+                                                {% else %}
+                                                    <span style="color: {{ comment.logincolor }}">{{ comment.login }}</span>
+                                                {% endif %}
+                                                - <span class="comment-date" title="{{ comment.date }}">{{ comment.formatted_date }}</span>
+
+                                                {% if status in ['admin', 'founder', 'manager', 'mod', 'council'] %}
+                                                <a href="javascript:void(0)" onclick="toggleComment({{ comment.id }}, '{% if comment.deleted %}unseal{% else %}seal{% endif %}', this); return false;" style="color:red; margin-left:10px; text-decoration:none;">
+                                                    {% if comment.deleted %}Unseal{% else %}Seal{% endif %}
+                                                </a>
+                                            {% endif %}
+                                            </span>
+                                        </div>
+                                        <div class="comment-content">{{ comment.comment }}</div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div style="text-align: center; color: #bababa; font-size: 13px;">Comments are disabled.</div>
+                    <div class="separator"></div>
+                {% endif %}
+
+                <div class="tos-note">
+                    Please note that all posted information is publicly available and must follow our <a href="/tos">TOS</a>.
+                </div>
+
+                <div class="separator"></div>
+            </div>
+
+            {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich', 'criminal'] and username|lower == owner.login|lower or status in ['admin', 'founder', 'manager', 'mod'] %}
+            <div class="settings-content">
+                <div id="settings-error" style="color: #ff0000; margin-bottom: 10px; display: none; font-size: 13px;"></div>
+                
+                {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich'] %}
+                <div class="form-group">
+                    <label for="paste-password">Paste Password</label>
+                    <input type="password" id="paste-password" placeholder="Optional" value='{% if password %}{{ password }}{% endif %}'>
+                </div>
+                {% endif %}
+                
+                <div class="visibility-options">
+                    <label>Paste Visibility</label>
+
+                    {% for value, label in [['public', 'Public'], ['unlisted', 'Unlisted'], ['private', 'Private']] %}
+                        <div class="visibility-option">
+                            <label for="visibility-{{ value }}">{{ label }}</label>
+                            <input type="radio" id="visibility-{{ value }}" name="visibility" value="{{ value }}" {% if type == value %}checked{% endif %}>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="separator"></div>
+
+                <div style="margin-top: 20px;">
+                    <button class="button" style="background: #557C51 !important" onclick="savePasteSettings()">Save Changes</button>
+                    <div style="height: 5px"></div>
+                    <button class="button" onclick="window.location.href='/upload/{{ pastname_c }}'">Back</button>
+                </div>
+            </div>
+
+            <script>
+                function savePasteSettings() {
+                    {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich'] %}
+                    const password = document.getElementById('paste-password')?.value || '';
+                    {% else %}
+                    const password = '';
+                    {% endif %}
+                    const visibility = document.querySelector('input[name="visibility"]:checked')?.value || 'public';
+
+                    const url = `/api/editPasteVisibility?pasteID={{ id }}&type=${visibility}&password=${encodeURIComponent(password)}`;
+
+                    fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            const errorDiv = document.getElementById('settings-error');
+                            errorDiv.textContent = data.error || 'Failed to update paste settings';
+                            errorDiv.style.display = 'block';
+                        }
+                    })
+                    .catch(error => {
+                        const errorDiv = document.getElementById('settings-error');
+                        errorDiv.textContent = 'An error occurred while saving settings';
+                        errorDiv.style.display = 'block';
+                    });
+                }
+            </script>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+    <div id="hideModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <span class="modal-close" onclick="closeHideModal()">&times;</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: #fff;">Seal Paste</h2>
+            <div id="hideModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <select id="hide-dropdown" style="width: 100%; box-sizing: border-box;" onchange="updateReasonInput()">
+                    <option value="" selected></option>
+                    <option value="Insufficient info - Read TOS">Insufficient</option>
+                    <option value="Contains info on a minor under 15 - Read TOS">Underage</option>
+                    <option value="Spam - Read TOS">Spam / Irrelevant</option>
+                    <option value="Threats - Read TOS">Threats</option>
+                    <option value="Contains explicit imagery of a minor. Do not reupload.">CP</option>
+                    <option value="Contains a lack of information. Please provide more information.">Lack of effort</option>
+                    <option value="Bot Output">Bot Output</option>
+                </select>
+                <textarea id="hide-reason" placeholder="Reason" style="width: 100%; box-sizing: border-box;"></textarea>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="notifyUser" checked>
+                    <label for="notifyUser">Notify user</label>
+                </div>
+                <button onclick="submitHideForm()">Seal</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+    <div id="unsealModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <span class="modal-close" onclick="closeUnsealModal()">&times;</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: #fff;">Unseal Paste</h2>
+            <div id="unsealModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <select id="unseal-dropdown" style="width: 100%; box-sizing: border-box;" onchange="updateUnsealReasonInput()">
+                    <option value="" selected></option>
+                    <option value="Mistakenly deleted">Mistakenly deleted</option>
+                    <option value="Restoring after review">Reviewed and approved</option>
+                    <option value="False report">False report</option>
+                </select>
+                <textarea id="unseal-reason" placeholder="Reason" style="width: 100%; box-sizing: border-box;"></textarea>
+                <div class="checkbox-container">
+                    <input type="checkbox" id="notifyUserUnseal" checked>
+                    <label for="notifyUserUnseal">Notify user</label>
+                </div>
+                <button onclick="submitUnsealForm()">Unseal</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if status == 'council' %}
+    <div id="flagModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <span class="modal-close" onclick="closeFlagModal()">&times;</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: #fff;">Flag Paste</h2>
+            <div id="flagModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <select id="flag-dropdown" style="width: 100%; box-sizing: border-box;" onchange="updateFlagReason()">
+                    <option value="" selected></option>
+                    <option value="Insufficient info - Read TOS">Insufficient</option>
+                    <option value="Contains info on a minor under 15 - Read TOS">Underage</option>
+                    <option value="Spam - Read TOS">Spam / Irrelevant</option>
+                    <option value="Threats - Read TOS">Threats</option>
+                    <option value="Contains explicit imagery of a minor. Do not reupload.">CP</option>
+                    <option value="Contains a lack of information. Please provide more information.">Lack of effort</option>
+                    <option value="Bot Output">Bot Output</option>
+                </select>
+                <textarea id="flag-reason" placeholder="Reason" style="width: 100%; box-sizing: border-box;"></textarea>
+                <button onclick="submitFlagForm()">Flag</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+
+    <div id="addStaffMemoModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <span class="modal-close" onclick="closeStaffMemoModal()">×</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: #fff;">Add Staff Note</h2>
+            <div id="staffMemoModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <select id="memoType" style="width: 100%; box-sizing: border-box;">
+                    <option value="" selected>Choose type</option>
+                    <option value="priority">Priority</option>
+                </select>
+                <textarea id="memoContent" placeholder="Note" style="width: 100%; box-sizing: border-box;"></textarea>
+                <button onclick="submitStaffMemo()">Add Note</button>
+            </div>
+        </div>
+    </div>
+    <div id="viewStaffMemosModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); z-index: 1000;">
+        <div style="height: 100%; display: flex; align-items: center; justify-content: center;">
+            <div class="modal-content" style="width: 800px; height: 600px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 10px;">
+                    <h2 style="margin: 0; flex: 1; color: #fff;">Staff Notes</h2>
+                    <button onclick="switchToAddMemo()" style="background: #753B3B; color: #fff; border: 1px solid #333; padding: 4px 12px; border-radius: 3px; cursor: pointer; font-size: inherit; font-family: inherit; position: absolute; left: 50%; top: 600px; transform: translateX(-50%);">New Note</button>
+                    <span class="modal-close" onclick="closeViewStaffMemosModal()" style="color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; line-height: 20px;">×</span>
+                </div>
+                <div id="memosList" style="height: calc(100% - 70px); overflow-y: auto; padding: 0 10px;">
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if status in ['admin', 'founder'] %}
+    <div id="changeViewsModal" class="modal">
+        <div class="modal-content" style="width: 500px;">
+            <span class="modal-close" onclick="closeChangeViewsModal()">×</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px; color: #fff;">Change Views Modal</h2>
+            <div id="ChangeViewsModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <textarea id="changeViewsContent" placeholder=".." style="width: 100%; box-sizing: border-box;"></textarea>
+                <button onclick="submitChangeViews()">Change Views</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        const pasteId = {{ id }};
+
+        function formatDate(dateString) {
+            if (!dateString?.trim() || dateString === 'undefined' || dateString === 'null') return 'Unknown Date';
+            const d = new Date(dateString);
+            if (isNaN(d)) return 'Unknown Date';
+            const m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+            const day = d.getDate();
+            return `${m} ${day}, ${d.getFullYear()}`;
+        }
+
+        async function fetchMemos(pasteId) {
+            try {
+                const response = await fetch(`/api/fetchMemos?pasteID=${pasteId}`, { method: 'GET', credentials: 'same-origin' });
+                const { success, memos } = await response.json();
+                pasteMemos = success && Array.isArray(memos) ? memos.map(m => ({
+                    memoID: parseInt(m.id, 10) || null,
+                    type: m.type || '',
+                    value: m.value || '',
+                    username: m.username || '',
+                    createdAt: m.created_at || new Date().toISOString(),
+                    rankStyle: m.rankStyle || '',
+                    usernameColor: m.usernameColor || '',
+                    suffix: m.suffix || ''
+                })).filter(m => m.memoID) : [];
+            } catch {
+                pasteMemos = [];
+            }
+        }
+
+        {% if status in ['admin', 'founder'] %}
+        function showChangeViewsModal() {
+            const modal = document.getElementById('changeViewsModal');
+            modal.style.display = 'flex';
+            document.getElementById('changeViewsContent').value = '{{ views }}';
+        }
+
+        function closeChangeViewsModal() {
+            document.getElementById('changeViewsModal').style.display = 'none';
+        }
+
+        async function submitChangeViews() {
+            const value = document.getElementById('changeViewsContent').value.trim();
+            if (!value) return showError('ChangeViewsModalError', 'Views cannot be blank!');
+            try {
+                const response = await fetch(`/api/changeViews?pasteID=${pasteId}&value=${encodeURIComponent(value)}`, { method: 'GET', credentials: 'same-origin' });
+                const { success, error } = await response.json();
+                if (success) {
+                    closeChangeViewsModal();
+                    location.reload();
+                } else {
+                    showError('ChangeViewsModalError', error || 'Failed to change views');
+                }
+            } catch {
+                showError('ChangeViewsModalError', 'An error occurred.');
+            }
+        }
+        {% endif %}
+
+        function showStaffMemoModal() {
+            const modal = document.getElementById('addStaffMemoModal');
+            modal.style.display = 'flex';
+            document.getElementById('staffMemoModalError').style.display = 'none';
+            document.getElementById('memoContent').value = '';
+            document.getElementById('memoType').value = '';
+        }
+
+        function closeStaffMemoModal() {
+            document.getElementById('addStaffMemoModal').style.display = 'none';
+        }
+
+        async function submitStaffMemo() {
+            const type = document.getElementById('memoType').value;
+            const value = document.getElementById('memoContent').value.trim();
+            if (!value) return showError('staffMemoModalError', 'Memo cannot be blank!');
+            try {
+                const response = await fetch(`/api/addMemo?pasteID=${pasteId}&type=${encodeURIComponent(type)}&value=${encodeURIComponent(value)}`, { method: 'GET', credentials: 'same-origin' });
+                const { success, memoID, error } = await response.json();
+                if (success) {
+                    closeStaffMemoModal();
+                    showViewStaffMemosModal();
+                } else {
+                    showError('staffMemoModalError', error || 'Failed to add memo');
+                }
+            } catch {
+                showError('staffMemoModalError', 'An error occurred.');
+            }
+        }
+
+        async function showViewStaffMemosModal() {
+        document.getElementById('viewStaffMemosModal').style.display = 'flex';
+            await fetchMemos(pasteId);
+            const memosList = document.getElementById('memosList');
+            memosList.innerHTML = '';
+            pasteMemos.sort((a, b) => (b.type === 'priority' ? 1 : 0) - (a.type === 'priority' ? 1 : 0) || new Date(b.createdAt) - new Date(a.createdAt));
+            pasteMemos.forEach(memo => {
+                if (!memo.memoID) return;
+                const memoDiv = document.createElement('div');
+                memoDiv.style.cssText = 'background:#282828;border-radius:2px;padding:12px;margin-bottom:10px';
+                const headerDiv = document.createElement('div');
+                headerDiv.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:8px';
+                const leftSide = document.createElement('div');
+                leftSide.style.cssText = 'display:flex;align-items:center';
+                const userLink = document.createElement('a');
+                userLink.href = memo.username ? `/user/${memo.username}` : '/';
+                userLink.style.cssText = 'color:inherit;text-decoration:none';
+                const username = document.createElement('span');
+                username.style.cssText = memo.rankStyle + ' padding: 0 4px; display: inline-block; background-repeat: no-repeat;';
+
+                const coloredUsername = document.createElement('span');
+                coloredUsername.style.color = memo.usernameColor;
+                coloredUsername.textContent = memo.username;
+
+                username.appendChild(coloredUsername);
+                username.appendChild(document.createTextNode(' ' + memo.suffix));
+                userLink.appendChild(username);
+
+                leftSide.appendChild(userLink);
+                const timestamp = document.createElement('span');
+                timestamp.style.cssText = 'color:#666;margin-left:10px';
+                timestamp.textContent = formatDate(memo.createdAt);
+                leftSide.appendChild(timestamp);
+                const deleteBtn = document.createElement('span');
+                deleteBtn.style.cssText = 'color:#ff0000;margin-left:10px;cursor:pointer';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.onclick = () => deleteMemo(memo.memoID);
+                leftSide.appendChild(deleteBtn);
+                headerDiv.appendChild(leftSide);
+                if (memo.type === 'priority') {
+                    const priority = document.createElement('span');
+                    priority.style.cssText = 'color:#ff0000';
+                    priority.textContent = '[Priority]';
+                    headerDiv.appendChild(priority);
+                }
+                const content = document.createElement('div');
+                content.style.cssText = 'white-space:pre-wrap;color:#fff;font-size:13px;line-height:1.4';
+                content.textContent = memo.value;
+                memoDiv.appendChild(headerDiv);
+                memoDiv.appendChild(content);
+                memosList.appendChild(memoDiv);
+            });
+        }
+
+        function closeViewStaffMemosModal() {
+            document.getElementById('viewStaffMemosModal').style.display = 'none';
+        }
+
+        function switchToAddMemo() {
+            closeViewStaffMemosModal();
+            showStaffMemoModal();
+        }
+
+        async function deleteMemo(memoId) {
+            const confirmed = confirm('Are you sure you want to do this?');
+            if (!confirmed) return;
+            
+            if (!memoId || isNaN(parseInt(memoId))) return alert('Invalid memo ID.');
+            try {
+                const response = await fetch(`/api/deleteMemo?memoID=${encodeURIComponent(memoId)}`, { method: 'GET', credentials: 'same-origin' });
+                const { success, error } = await response.json();
+                if (success) {
+                    pasteMemos = pasteMemos.filter(memo => memo.memoID !== memoId);
+                    showViewStaffMemosModal();
+                    alert('Memo deleted successfully.');
+                } else {
+                    alert(`Failed to delete memo: ${error || 'Unknown error'}`);
+                }
+            } catch (e) {
+                alert(`Error deleting memo: ${e.message}`);
+            }
+        }
+       
+        function showError(id, msg) {
+            const e = document.getElementById(id);
+            e.textContent = msg;
+            e.style.display = 'block';
+        }
+    </script>
+    {% endif %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const thumbsUp = document.querySelector('.reaction-button:first-child');
+            const thumbsDown = document.querySelector('.reaction-button:last-child');
+            
+            thumbsUp.addEventListener('click', () => addReaction(1));
+            thumbsDown.addEventListener('click', () => addReaction(0));
+        });
+
+        async function addReaction(reactionType) {
+            try {
+                const response = await fetch(`/api/addReaction?pasteID={{ id }}&reactionType=${reactionType}`);
+                const data = await response.json();
+                
+                if (data.error === 'UNAUTHENTICATED') {
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (data.success) {
+                    const thumbsUp = document.querySelector('.reaction-button:first-child');
+                    const thumbsDown = document.querySelector('.reaction-button:last-child');
+                    thumbsUp.innerHTML = `<i class="fas fa-thumbs-up"></i> ${data.likes}`;
+                    thumbsDown.innerHTML = `<i class="fas fa-thumbs-down"></i> ${data.dislikes}`;
+                }
+            } catch (error) {
+                console.error('Error adding reaction:', error);
+            }
+        }
+
+        {% if commentsstatus %}
+        document.addEventListener('DOMContentLoaded', function () {
+            var commentTextarea = document.getElementById('comment-input');
+            
+            commentTextarea.addEventListener('input', function () {
+                var value = commentTextarea.value;
+                commentTextarea.value = value.replace(/[^a-zA-Z0-9а-яА-Я\s\+\-]/g, '');
+            });
+
+            const form = document.getElementById('comment-form');
+            form.addEventListener('submit', function(event) {
+                const recaptchaResponse = turnstile.getResponse();
+                if (!recaptchaResponse) {
+                    event.preventDefault();
+                    displayError('Captcha verification failed.');
+                    return;
+                }
+
+                var comment = commentTextarea.value;
+
+                if (comment.length < 3) {
+                    event.preventDefault();
+                    displayError('Comment must be at least 3 characters long.');
+                } else if (comment.length > 30) {
+                    event.preventDefault();
+                    displayError('Comment must be less than or equal to 30 characters.');
+                }
+
+                var regex = /^[a-zA-Z0-9а-яА-Я\s\+\-]+$/;
+                if (!regex.test(comment)) {
+                    event.preventDefault();
+                    displayError('Comment can only contain letters (a-z, А-Я), numbers (0-9), and spaces.');
+                }
+
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = 'cf-recaptcha-response';
+                tokenInput.value = recaptchaResponse;
+                form.appendChild(tokenInput);
+            });
+
+            function displayError(message) {
+                var errorElement = document.getElementById('comment-error');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                }
+            }
+        });
+        {% endif %}
+        
+        const toggleButton = document.querySelector('.toggle-sidebar');
+        const sidebar = document.querySelector('.sidebar');
+        
+        toggleButton.addEventListener('click', function() {
+            sidebar.classList.toggle('hidden');
+            if (sidebar.classList.contains('hidden')) {
+                toggleButton.style.right = '0';
+            } else {
+                toggleButton.style.right = '304px';
+            }
+        });
+
+        function sanitize(input) {
+            return input
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#x27;')
+                .replace(/\//g, '&#x2F;');
+        }
+
+        const originalSetAttribute = Element.prototype.setAttribute;
+        Element.prototype.setAttribute = function(name, value) {
+            if (name === 'href') {
+                value = sanitize(value);
+            }
+            originalSetAttribute.call(this, name, value);
+        };
+
+        function makeLinksClickable() {
+            const pre = document.querySelector('.content-area pre');
+            if (!pre) return;
+
+            const content = pre.innerHTML;
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            pre.innerHTML = content.replace(urlRegex, url => `<a href="${sanitize(url)}" target="_blank">${url}</a>`);
+        }
+        document.addEventListener('DOMContentLoaded', makeLinksClickable);
+
+        {% if status in ['admin', 'founder', 'manager', 'mod', 'council'] %}
+        async function toggleComment(commentId, action, el) {
+            try {
+                const res = await fetch(`/api/manageCommentType?action=${action}&commentID=${commentId}`);
+                const data = await res.json();
+
+                if (!data.success) {
+                    alert(data.error || "Error");
+                    return;
+                }
+
+                if (action === "seal") {
+                    el.innerText = "Unseal";
+                    el.onclick = () => toggleComment(commentId, "unseal", el);
+                } else {
+                    el.innerText = "Seal";
+                    el.onclick = () => toggleComment(commentId, "seal", el);
+                }
+
+            } catch (err) {
+                alert('Update page.');
+                location.reload();
+            }
+        }
+        {% endif %}
+        
+        {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+        function showHideModal(pasteId, element) {
+            currentPasteId = pasteId;
+            document.getElementById('hideModal').style.display = 'block';
+            document.getElementById('hideModalError').style.display = 'none';
+            document.getElementById('hide-dropdown').value = '';
+            document.getElementById('hide-reason').value = '';
+            document.getElementById('notifyUser').checked = true;
+        }
+
+        function closeHideModal() {
+            document.getElementById('hideModal').style.display = 'none';
+        }
+
+        function updateReasonInput() {
+            const select = document.getElementById('hide-dropdown');
+            const input = document.getElementById('hide-reason');
+            input.value = select.value;
+        }
+
+        async function submitHideForm() {
+            const errorDiv = document.getElementById('hideModalError');
+            errorDiv.style.display = 'none';
+
+            const reason = document.getElementById('hide-reason').value.trim();
+            const notify = document.getElementById('notifyUser').checked;
+
+            if (!reason.length) {
+                errorDiv.textContent = 'Input reason.';
+                errorDiv.style.display = 'block';
+                return
+            }
+
+            let url = `/api/managePasteType?action=seal&pasteID=${currentPasteId}&csrf={{ csrf_token }}`;
+            if (reason) {
+                url += `&reason=${encodeURIComponent(reason)}`;
+            }
+            url += `&notify=${notify}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    closeHideModal();
+                    location.reload();
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to delete paste';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = 'An error occurred while deleting the paste';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal1 = document.getElementById('hideModal');
+            const modal2 = document.getElementById('unsealModal');
+            {% if username == 'Admin' %}
+            const modal3 = document.getElementById('changeViewsModal');
+            {% endif %}
+            if (event.target === modal1 || event.target === modal2 || event.target === document.getElementById('addStaffMemoModal') {% if username == 'Admin' %}|| event.target === document.getElementById('changeViewsModal'){% endif %}) {
+                closeHideModal();
+                closeUnsealModal();
+                closeStaffMemoModal();
+                {% if username == 'Admin' %}
+                closeChangeViewsModal();
+                {% endif %}
+            }
+        };
+        {% endif %}
+
+        {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+        function showUnsealModal(pasteId, element) {
+            currentPasteId = pasteId;
+            document.getElementById('unsealModal').style.display = 'block';
+            document.getElementById('unsealModalError').style.display = 'none';
+            document.getElementById('hide-dropdown').value = '';
+            document.getElementById('unseal-reason').value = '';
+            document.getElementById('notifyUserUnseal').checked = true;
+        }
+
+        function closeUnsealModal() {
+            document.getElementById('unsealModal').style.display = 'none';
+        }
+        
+        function updateUnsealReasonInput() {
+            const select = document.getElementById('unseal-dropdown');
+            const input = document.getElementById('unseal-reason');
+            input.value = select.value;
+        }
+
+        async function submitUnsealForm() {
+            const errorDiv = document.getElementById('unsealModalError');
+            errorDiv.style.display = 'none';
+
+            const reason = document.getElementById('unseal-reason').value.trim();
+            const notify = document.getElementById('notifyUserUnseal').checked;
+
+            if (!reason.length) {
+                errorDiv.textContent = 'Input reason.';
+                errorDiv.style.display = 'block';
+                return
+            }
+
+            let url = `/api/managePasteType?action=unseal&pasteID=${currentPasteId}&csrf={{ csrf_token }}`;
+            if (reason) {
+                url += `&reason=${encodeURIComponent(reason)}`;
+            }
+            url += `&notify=${notify}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    closeUnsealModal();
+                    location.reload();
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to restore paste';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = 'An error occurred while restoring the paste';
+                errorDiv.style.display = 'block';
+            }
+        }
+        {% endif %}
+    </script>
+    {% if status == 'council' %}
+    <script>
+        function showFlagModal() {
+            document.getElementById('flagModal').style.display = 'block';
+            document.getElementById('flag-dropdown').value = '';
+            document.getElementById('flag-reason').value = '';
+            document.getElementById('flagModalError').style.display = 'none';
+        }
+
+        function closeFlagModal() {
+            document.getElementById('flagModal').style.display = 'none';
+        }
+
+        function updateFlagReason() {
+            const dropdown = document.getElementById('flag-dropdown');
+            const reasonInput = document.getElementById('flag-reason');
+            reasonInput.value = dropdown.value;
+        }
+
+        function submitFlagForm() {
+            const reason = document.getElementById('flag-reason').value.trim();
+
+            if (!reason.length) {
+                errorDiv.textContent = 'Input reason.';
+                errorDiv.style.display = 'block';
+                return
+            }
+
+            let url = `/api/flagPaste?pasteID={{ id }}`;
+            
+            if (reason) {
+                url += `&reason=${encodeURIComponent(reason)}`;
+            }
+
+            fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+					window.location.reload();
+                } else {
+                    const errorDiv = document.getElementById('flagModalError');
+                    errorDiv.textContent = data.error || 'Failed to flag paste';
+                    errorDiv.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                const errorDiv = document.getElementById('flagModalError');
+                errorDiv.textContent = 'An error occurred while flagging the paste';
+                errorDiv.style.display = 'block';
+            });
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('flagModal');
+            if (event.target === modal) {
+                closeFlagModal();
+            }
+        };
+    </script>
+    {% endif %}
+
+    {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich', 'criminal'] %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const settingsIcon = document.querySelector('.settings-icon');
+            const sidebarContent = document.querySelector('.sidebar-content');
+            const settingsContent = document.querySelector('.settings-content');
+            
+            if (settingsIcon) {
+                settingsIcon.addEventListener('click', function() {
+                    if (sidebarContent.classList.contains('hidden')) {
+                        sidebarContent.classList.remove('hidden');
+                        settingsContent.classList.remove('visible');
+                    } else {
+                        sidebarContent.classList.add('hidden');
+                        settingsContent.classList.add('visible');
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,1047 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Settings | Vilebin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+</head>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background: #060606;
+        color: #fff;
+        min-height: 100vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        color: #fff;
+    }
+
+    .settings-content {
+        background: transparent;
+        border: 2px solid #222;
+        padding: 25px;
+        padding-bottom: 80px;
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    #status-message {
+        font-size: 13px;
+        padding: 8px 16px;
+        border-radius: 0;
+        text-align: center;
+        margin-bottom: 20px;
+        background: transparent;
+        display: none;
+    }
+
+    #status-message.success {
+        color: #33ff33;
+        border: 1px solid #33ff33;
+    }
+
+    #status-message.error {
+        color: #ff3333;
+        border: 1px solid #ff3333;
+    }
+
+    #status-message a {
+        color: inherit;
+        text-decoration: underline;
+    }
+
+    .settings-section {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .settings-row {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .settings-label {
+        color: #fff;
+        font-size: 0.9rem;
+        padding-top: 8px;
+        font-weight: bold;
+    }
+
+    .input-container {
+        max-width: 350px;
+        width: 100%;
+        position: relative;
+    }
+
+    .settings-input {
+        width: 100%;
+        background: #111;
+        border: none;
+        color: #fff;
+        padding: 12px;
+        border-radius: 0;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+    }
+
+    .settings-input:focus {
+        outline: none;
+    }
+
+    #username-input {
+        padding-right: 35px;
+    }
+
+    .settings-button {
+        background: transparent;
+        color: #fff;
+        border: 1px solid #333;
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        border-radius: 0;
+    }
+
+    .settings-button.danger {
+        border-color: #ff3333;
+        color: #ff3333;
+    }
+
+    .color-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 25px);
+        gap: 5px;
+        max-width: 350px;
+    }
+
+    .color-option {
+        width: 25px;
+        height: 25px;
+        border: 2px solid #222;
+        cursor: pointer;
+        box-sizing: border-box;
+        border-radius: 0;
+    }
+
+    .color-option.none {
+        background: transparent;
+    }
+
+    .color-option.selected {
+        border: 2px solid #fff;
+    }
+
+    .avatar-container {
+        max-width: 350px;
+    }
+
+    .avatar-preview {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 0;
+        margin-bottom: 10px;
+    }
+
+    .banner-container {
+        max-width: 700px;
+        margin-bottom: 20px;
+    }
+
+    .banner-preview {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 0;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+    #remove-banner-btn {
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    #remove-avatar-btn {
+        width: 120px;
+        margin-top: 10px;
+        display: block;
+    }
+
+    .fixed-update-container {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #060606;
+        padding: 10px;
+        display: flex;
+        justify-content: center;
+        border-top: 1px solid #222;
+        z-index: 1000;
+    }
+
+    .update-button {
+        background: #1a1a1a;
+        color: #fff;
+        border: 1px solid #333;
+        padding: 10px 30px;
+        cursor: pointer;
+        font-size: 1rem;
+        min-width: 150px;
+        border-radius: 0;
+    }
+
+    /* Username status indicator */
+    .username-status {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 14px;
+        color: #666;
+        display: none;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .username-status.show {
+        display: inline;
+    }
+
+    .username-status.available {
+        color: #33ff33;
+    }
+
+    .username-status.taken {
+        color: #ff3333;
+    }
+
+    /* Avatar styles */
+    .avatar-upload {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    #avatar-input {
+        display: none;
+    }
+
+    /* Two-factor auth styles */
+    .two-fa-status {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 0;
+        background: #ff3333;
+        margin-right: 10px;
+        display: none;
+    }
+
+    .status-indicator.enabled {
+        background: #33ff33;
+        display: inline-block;
+    }
+
+    /* Modal styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #111;
+        padding: 20px;
+        border: 1px solid #333;
+        border-radius: 0;
+        width: 90%;
+        max-width: 400px;
+    }
+
+    #totpModal .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #111;
+        padding: 20px;
+        border: 1px solid #333;
+        border-radius: 0;
+        width: 90%;
+        max-width: 400px;
+    }
+
+    #disableTotpModal .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #111;
+        padding: 20px;
+        border: 1px solid #333;
+        border-radius: 0;
+        width: 90%;
+        max-width: 400px;
+    }
+
+    #statusModal .modal-content {
+        max-width: 400px;
+        padding: 20px;
+        border: none;
+        border-radius: 0;
+        background-color: #111;
+    }
+
+    #statusModal #statusMessage {
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    #statusModal .button-container {
+        text-align: center;
+    }
+
+    #statusModal .settings-button {
+        min-width: 80px;
+    }
+
+    #totpModal .modal-title {
+        margin: 0 0 20px 0;
+        padding: 0;
+        color: #fff;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    .qr-container {
+        text-align: center;
+        margin: 15px 0;
+        background: #fff;
+        padding: 15px;
+        border-radius: 0;
+    }
+
+    .qr-container img {
+        max-width: 200px;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .secret-container {
+        padding: 12px;
+        margin: 15px 0;
+        word-break: break-all;
+        font-family: monospace;
+        background: #060606;
+        border: 1px solid #222;
+        border-radius: 0;
+        font-size: 14px;
+    }
+
+    #totpCode,
+    #disableTotpCode {
+        width: 100%;
+        background: #060606;
+        border: 1px solid #222;
+        color: #fff;
+        padding: 12px;
+        margin: 15px 0;
+        border-radius: 0;
+        font-size: 14px;
+        box-sizing: border-box;
+    }
+
+    #totpStep1 p {
+        color: #666;
+        margin: 15px 0;
+        font-size: 14px;
+    }
+
+    #disableTotpModal .modal-title {
+        margin: 0 0 20px 0;
+        padding: 0;
+        color: #fff;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    #disableTotpModal p {
+        color: #666;
+        margin: 15px 0;
+        font-size: 14px;
+    }
+
+    .modal-close {
+        position: absolute;
+        right: 15px;
+        top: 12px;
+        color: #666;
+        font-size: 24px;
+        font-weight: normal;
+        cursor: pointer;
+    }
+
+    @media screen and (max-width: 768px) {
+        .settings-container {
+            padding: 10px;
+        }
+
+        .settings-content {
+            border: none;
+            padding: 15px;
+            padding-bottom: 70px;
+            gap: 20px;
+        }
+
+        .settings-row {
+            grid-template-columns: 1fr;
+            gap: 4px;
+        }
+
+        .settings-label {
+            padding-top: 0;
+        }
+
+        .input-container,
+        .avatar-container {
+            max-width: none;
+        }
+
+        .color-grid {
+            grid-template-columns: repeat(auto-fill, 25px);
+            max-width: none;
+            gap: 8px;
+        }
+
+        .fixed-update-container {
+            padding: 8px;
+        }
+
+        .update-button {
+            width: 100%;
+            max-width: 200px;
+        }
+
+        .modal-content {
+            margin: 50vh auto 0;
+            transform: translateY(-50%);
+            width: calc(100% - 40px);
+            padding: 15px;
+        }
+
+        #statusModal .modal-content {
+            margin: 50vh auto 0;
+            transform: translateY(-50%);
+            width: calc(100% - 40px);
+        }
+
+        .qr-container {
+            padding: 10px;
+        }
+
+        .qr-container img {
+            max-width: 180px;
+        }
+
+        #totpModal .modal-content,
+        #disableTotpModal .modal-content,
+        #statusModal .modal-content {
+            width: calc(100% - 40px) !important;
+            padding: 15px !important;
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            margin: 0 !important;
+        }
+    }
+
+    @keyframes blink {
+        0% { opacity:1; }
+        50% { opacity:0; }
+        100% { opacity:1; }
+    }
+</style>
+
+<body>
+    <div class="settings-container">
+
+        <form id="remove-image-form" action="/settings" method="POST" style="display: none;">
+            <input type="hidden" name="remove-avatar" id="remove-avatar" value="">
+            <input type="hidden" name="remove-banner" id="remove-banner" value="">
+        </form>
+
+        <div class="modal" id="statusModal">
+            <div class="modal-content">
+                <div id="statusMessage"></div>
+                <div class="button-container">
+                    <button onclick="closeStatusModal()" class="settings-button">OK</button>
+                </div>
+            </div>
+        </div>
+        <div class="settings-content">
+            <div class="settings-section">
+                <div class="settings-row">
+                    <div class="settings-label">Banner</div>
+                    <div class="banner-container">
+                            {% if banner %}
+                            <label for="banner-input">
+                                <img class="banner-preview" src="/user/{{ username }}/banner" loading="lazy">
+                            </label>
+                            {% endif %}
+
+                            <form id="banner-form" action="/settings" method="POST" style="{% if banner %}display: none;{% endif %}" enctype="multipart/form-data">
+                                <input id="banner-input" name="banner" type="file" accept="image/*" onchange="this.form.submit()" />
+                            </form>
+                            
+                            {% if banner %}
+                            <button class="settings-button danger" onclick="removeImage('banner')" id="remove-banner-btn">Remove</button>
+                            {% endif %}
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label">Avatar</div>
+                    <div class="avatar-container">
+                        <div class="avatar-upload">
+                            <label for="avatar-input">
+                                {% if avatar %}
+                                <img class="avatar-preview" style="width: 120px;height: 120px;object-fit: cover;" src="/user/{{ username }}/avatar" loading="lazy">
+                                {% else %}
+                                <img class="avatar-preview" style="width: 120px;height: 120px;object-fit: cover;" src="/static/default.jpg" loading="lazy">
+                                {% endif %}
+                            </label>
+                            
+                            <form id="avatar-form" action="/settings" method="POST" style="display: none;" enctype="multipart/form-data">
+                                <input id="avatar-input" name="image" type="file" accept="image/*" onchange="this.form.submit()" />
+                            </form>
+                                                        
+                            {% if avatar %}
+                            <button class="settings-button danger" onclick="removeImage('avatar')" id="remove-avatar-btn">Remove</button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label">Username</div>
+                    <div class="input-container">
+                        <input placeholder="Username" type="text" class="settings-input" id="username-input" pattern="[A-Za-z0-9]+" value="{{ username }}">
+                        <i class="username-status"></i>
+                    </div>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label">Bio</div>
+					<input placeholder="Bio" class="settings-input" id="bio-input" type="text" data="{{ bio }}" value="{% if bio %}{{ bio }}{% endif %}" {% if status not in ['admin', 'founder', 'manager', 'mod', 'council']%}maxlength="50"{% endif %}>
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label">Username Color</div>
+                    <div class="color-grid">
+                        <div class="color-option none" onclick="updateColor(this)" data-color="" title="None" style="background: {{ styles.get(status, styles['user']).rankColor }}"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#BB71E4" style="background: #BB71E4"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#4B2E83" style="background: #4B2E83"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#FEC8D8" style="background: #FEC8D8"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#BB1E64" style="background: #BB1E64"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#FFFFFF" style="background: #FFFFFF"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#365DDA" style="background: #365DDA"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#F96D31" style="background: #F96D31"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#FFFE71" style="background: #FFFE71"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#B83C26" style="background: #B83C26"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#C5C6D3" style="background: #C5C6D3"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#94FAAC" style="background: #94FAAC"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#964B00" style="background: #964B00"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#000080" style="background: #000080"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#FF69B4" style="background: #FF69B4"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#FFD580" style="background: #FFD580"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#601EF9" style="background: #601EF9"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#30D5C8" style="background: #30D5C8"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#9999FF" style="background: #9999FF"></div>
+                        <div class="color-option" onclick="updateColor(this)" data-color="#4C4CFF" style="background: #4C4CFF"></div>
+                    </div>
+                </div>
+
+                <div class="update-section">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-row">
+                    <div class="settings-label">Email</div>
+                    <input placeholder="Email" type="email" class="settings-input" id="email-input" data="{{ email }}" value="{% if email %}{{ email }}{% endif %}"">
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label">Current Password</div>
+                    <input type="password" class="settings-input" id="current-password" placeholder="Current Password">
+                </div>
+
+                <div class="settings-row">
+                    <div class="settings-label">New Password</div>
+                    <input type="password" class="settings-input" id="new-password" placeholder="New Password">
+                </div>
+
+                <div class="settings-row">
+                    
+                    {% if status in ['admin', 'founder', 'manager', 'mod', 'council'] and not totp %}
+                    <b style="color: #ff0000; font-size: 40px; white-space: nowrap; text-decoration:underline; animation: blink 3s infinite;">2FA mandatory for staff</b><br>
+                    {% endif %}
+
+                    <div class="settings-label">Two-Factor Auth</div>
+                    <div class="two-fa-status">
+                        <div class="status-indicator"></div>
+                        
+                        {% if totp %}
+                        <button class="settings-button" onclick="showDisableTotpModal()">Disable 2FA</button>
+                        {% else %}
+                        <button class="settings-button" onclick="showTotpModal()">Enable 2FA</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="fixed-update-container">
+            <button class="update-button" onclick="updateAllSettings()">Update</button>
+        </div>
+    </div>
+
+    <!-- TOTP Setup Modal -->
+    <div id="totpModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeTotpModal()">&times;</span>
+            <h2 class="modal-title">Setup Two-Factor Authentication</h2>
+            <div id="totpStep1">
+                <p>Scan this QR code with your authenticator app:</p>
+                <div class="qr-container">
+                    <img id="qrCode" src="" alt="QR Code">
+                </div>
+                <p>Or manually enter this secret:</p>
+                <div class="secret-container" id="secretKey"></div>
+                <p>After scanning, enter the code from your authenticator app:</p>
+                <input type="text" id="totpCode" placeholder="Enter 6-digit code">
+                <div id="totpError" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+                <button onclick="verifyTotpCode()" class="settings-button">Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disable TOTP Modal -->
+    <div id="disableTotpModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeDisableTotpModal()">&times;</span>
+            <h2 class="modal-title">Disable Two-Factor Authentication</h2>
+            <div>
+                <p>Enter your authenticator code to disable 2FA:</p>
+                <input type="text" id="disableTotpCode" placeholder="Enter 6-digit code">
+                <div id="disableTotpError" style="color: #ff0000; margin: 10px 0; display: none;"></div>
+                <button onclick="verifyDisableTotpCode()" class="settings-button">Verify</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    let usernameTimeout;
+    const statusContainer = document.querySelector('.status-container');
+
+    document.getElementById('username-input').addEventListener('input', function(e) {
+        const username = e.target.value.trim();
+        const statusEl = document.querySelector('.username-status');
+        
+        clearTimeout(usernameTimeout);
+        statusEl.className = 'username-status';
+        
+        if (username.length === 0) return;
+
+        usernameTimeout = setTimeout(() => {
+            fetch(`/api/checkUsername?username=${username}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.available) {
+                    statusEl.className = 'username-status fa-solid fa-check show available';
+                } else {
+                    statusEl.className = 'username-status fa-solid fa-xmark show taken';
+                }
+            });
+        }, 500);
+    });
+
+    function refreshAvatar() {
+        const avatarImg = document.querySelector('.avatar-preview');
+        const timestamp = new Date().getTime();
+        avatarImg.src = `/avatar/${encodeURIComponent('newaccount')}?t=${timestamp}`;
+    }
+
+    function refreshBanner() {
+        const bannerImg = document.querySelector('.banner-preview');
+        if (bannerImg) {
+            const timestamp = new Date().getTime();
+            bannerImg.src = `/banner/${encodeURIComponent('newaccount')}?t=${timestamp}`;
+        }
+    }
+
+    function removeImage(type) {
+        var form = document.getElementById('remove-image-form');
+        if (type === 'banner') {
+            document.getElementById('remove-banner').value = '1';
+            document.getElementById('remove-avatar').value = '';
+        } else if (type === 'avatar') {
+            document.getElementById('remove-avatar').value = '1';
+            document.getElementById('remove-banner').value = '';
+        } else if (type === 'background') {
+            document.getElementById('remove-avatar').value = '';
+            document.getElementById('remove-banner').value = '';
+            document.getElementById('remove-background').value = '1';
+        }
+        form.submit();
+    }
+
+    function showStatus(message, type) {
+        const messageDiv = document.getElementById('statusMessage');
+        messageDiv.innerHTML = message;
+        messageDiv.style.color = type === 'error' ? '#ff0000' : '#00ff00';
+        document.getElementById('statusModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeStatusModal() {
+        document.getElementById('statusModal').style.display = 'none';
+        document.body.style.overflow = '';
+        window.location.href = '/settings';
+    }
+
+    function showTotpModal() {
+        fetch('/api/setupTOTP')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('qrCode').src = data.qr_url;
+            document.getElementById('secretKey').textContent = data.secret;
+            document.getElementById('totpModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        })
+        .catch(() => {
+            showStatus('Failed to connect to server', 'error');
+        });
+    }
+
+    function closeTotpModal() {
+        document.getElementById('totpModal').style.display = 'none';
+        document.getElementById('totpCode').value = '';
+        document.getElementById('totpError').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function showDisableTotpModal() {
+        document.getElementById('disableTotpModal').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDisableTotpModal() {
+        document.getElementById('disableTotpModal').style.display = 'none';
+        document.getElementById('disableTotpCode').value = '';
+        document.getElementById('disableTotpError').style.display = 'none';
+        document.body.style.overflow = '';
+    }
+
+    function updateTwoFAStatus(enabled) {
+        const container = document.querySelector('.two-fa-status');
+        if (enabled) {
+            container.innerHTML = `
+                <button class="settings-button" onclick="showDisableTotpModal()">Disable 2FA</button>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="status-indicator"></div>
+                <button class="settings-button" onclick="showTotpModal()">Enable 2FA</button>
+            `;
+        }
+    }
+
+    function verifyTotpCode() {
+        const code = document.getElementById('totpCode').value.trim();
+        const errorDiv = document.getElementById('totpError');
+        
+        if (!code) {
+            errorDiv.textContent = 'Please enter the code';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        fetch(`/api/setupTOTP/${code}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                updateTwoFAStatus(true);
+                closeTotpModal();
+            } else {
+                errorDiv.textContent = data.error;
+                errorDiv.style.display = 'block';
+            }
+        })
+        .catch(() => {
+            errorDiv.textContent = 'Failed to connect to server';
+            errorDiv.style.display = 'block';
+        });
+    }
+
+    function verifyDisableTotpCode() {
+        const code = document.getElementById('disableTotpCode').value.trim();
+        const errorDiv = document.getElementById('disableTotpError');
+        
+        if (!code) {
+            errorDiv.textContent = 'Please enter the code';
+            errorDiv.style.display = 'block';
+            return;
+        }
+
+        fetch(`/api/disableTOTP/${code}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                updateTwoFAStatus(false);
+                closeDisableTotpModal();
+            } else {
+                errorDiv.textContent = data.error;
+                errorDiv.style.display = 'block';
+            }
+        })
+        .catch(() => {
+            errorDiv.textContent = 'Failed to connect to server';
+            errorDiv.style.display = 'block';
+        });
+    }
+
+    document.querySelectorAll('.settings-input, .color-option').forEach(element => {
+        element.addEventListener('change', () => {
+        });
+        if (element.tagName === 'INPUT') {
+            element.addEventListener('input', () => {
+            });
+        }
+    });
+
+    document.getElementById('username-input').addEventListener('input', function(e) {
+        const username = e.target.value;
+        const regex = /^[A-Za-z0-9]*$/;
+        
+        if (username.length > 20) {
+            e.target.value = username.slice(0, 20);
+        }
+        
+        if (!regex.test(username)) {
+            e.target.value = username.replace(/[^A-Za-z0-9]/g, '');
+        }
+    });
+
+    async function updateAllSettings() {
+        const bio = document.getElementById('bio-input').value.trim();
+        const biodata = document.getElementById('bio-input').getAttribute('data');
+        const username = document.getElementById('username-input').value.trim();
+        const email = document.getElementById('email-input').value.trim();
+        const emaildata = document.getElementById('email-input').getAttribute('data');
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        
+        let updatedSomething = false;
+        let lastSuccessMessage = '';
+
+        if (username !== '{{ username }}' || bio !== '{{ bio }}') {
+            const params = new URLSearchParams();
+            if (username !== '{{ username }}') params.append('username', username);
+            if (bio !== '{{ bio }}') params.append('bio', bio);
+            
+            try {
+                const res = await fetch(`/api/updateProfile?${params.toString()}`);
+                const data = await res.json();
+                if (!data.success) {
+                    if (data.purchase) {
+                        const domain = window.location.host;
+                        const errorMessage = `<span class="purchase-error">Purchase at <a href="/upgrades" style="color: inherit;">${domain}/upgrades</a></span>`;
+                        showStatus(errorMessage, 'error');
+                        return;
+                    }
+                    throw new Error(data.error);
+                }
+                updatedSomething = true;
+                lastSuccessMessage = data.message;
+            } catch (err) {
+                showStatus(err.message || 'Failed to update profile', 'error');
+                return;
+            }
+        }
+
+        const normalizedEmailData = (emaildata === 'None' || emaildata === null || emaildata === undefined) ? '' : emaildata;
+        if (email !== normalizedEmailData) {
+            try {
+                const res = await fetch(`/api/updateProfile?email=${encodeURIComponent(email)}`);
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                updatedSomething = true;
+                lastSuccessMessage = data.message;
+            } catch (err) {
+                showStatus(err.message || 'Failed to update email', 'error');
+                return;
+            }
+        }
+        
+        if (currentPassword && newPassword) {
+            try {
+                const res = await fetch(`/api/updateProfile?currentPassword=${encodeURIComponent(currentPassword)}&password=${encodeURIComponent(newPassword)}`);
+                const data = await res.json();
+                if (!data.success) throw new Error(data.error);
+                updatedSomething = true;
+                lastSuccessMessage = data.message;
+            } catch (err) {
+                showStatus(err.message || 'Failed to update password', 'error');
+                return;
+            }
+        }
+        
+        if (updatedSomething) {
+            showStatus(lastSuccessMessage, 'success');
+        }
+    }
+
+    
+    function updateUsername(username) {
+        fetch(`/api/updateProfile?username=${encodeURIComponent(username)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    showStatus(data.message, 'success');
+                } else if (data.purchase) {
+                    const domain = window.location.host;
+                    const errorMessage = `<span class="purchase-error">Purchase at <a href="/upgrades" style="color: inherit;">${domain}/upgrades</a></span>`;
+                    showStatus(errorMessage, 'error');
+                } else if (data.error) {
+                    showStatus(data.error, 'error');
+                }
+            })
+            .catch(() => {
+                showStatus('Failed to connect to server', 'error');
+            });
+    }
+
+    function updateColor(element) {
+        const color = element.dataset.color;
+        
+        fetch(`/api/updateProfile?usernameColor=${encodeURIComponent(color)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+                    element.classList.add('selected');
+                    fetch('/')
+                        .then(res => res.text())
+                        .then(html => {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+                            const newDropdownToggle = doc.querySelector('.dropdown-toggle');
+                            const currentDropdownToggle = document.querySelector('.dropdown-toggle');
+                            if (newDropdownToggle && currentDropdownToggle) {
+                                currentDropdownToggle.innerHTML = newDropdownToggle.innerHTML;
+                            }
+                        });
+                    showStatus(data.message, 'success');
+                } else if (data.purchase) {
+                    const domain = window.location.host;
+                    const errorMessage = `<span class="purchase-error">Purchase at <a href="/upgrades" style="color: inherit;">${domain}/upgrades</a></span>`;
+                    showStatus(errorMessage, 'error');
+                } else if (data.error) {
+                    showStatus(data.error, 'error');
+                }
+            })
+            .catch((error) => {
+                showStatus('Failed to connect to server', 'error');
+            });
+    }
+
+    function turnComments(status) {        
+        fetch(`/api/updateProfile?comments=${encodeURIComponent(status)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const container = document.querySelector('.comments-status');
+
+                    if (data.status) {
+                        container.innerHTML = `
+                            <button class="settings-button" onclick="turnComments(true)">On</button>
+                        `;
+                    } else {
+                        container.innerHTML = `
+                            <div class="status-indicator"></div>
+                            <button class="settings-button" onclick="turnComments(false)">Off</button>
+                        `;
+                    }
+
+                    showStatus(data.message, 'success');
+                } else if (data.error) {
+                    showStatus(data.error, 'error');
+                }
+            })
+            .catch((error) => {
+                showStatus('Failed to connect to server', 'error');
+            });
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const storedMessage = sessionStorage.getItem('settingsStatus');
+        const storedType = sessionStorage.getItem('settingsStatusType');
+        
+        if (storedMessage) {
+            showStatus(storedMessage, storedType);
+            sessionStorage.removeItem('settingsStatus');
+            sessionStorage.removeItem('settingsStatusType');
+        }
+    });
+
+    window.onclick = function(event) {
+        const statusModal = document.getElementById('statusModal');
+        const totpModal = document.getElementById('totpModal');
+        const disableTotpModal = document.getElementById('disableTotpModal');
+        
+        if (event.target === statusModal) {
+            closeStatusModal();
+        } else if (event.target === totpModal) {
+            closeTotpModal();
+        } else if (event.target === disableTotpModal) {
+            closeDisableTotpModal();
+        }
+    }
+</script>
+</html>
+{% endblock %}

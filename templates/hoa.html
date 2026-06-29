@@ -1,0 +1,365 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Hall of Autism | Vilebin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:url" content="/hoa">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Hall of Autism | Vilebin">
+    <meta property="og:description" content="Here lies the bullied, antisocial & doxed rejects who stepped into the wrong side of the internet.">
+</head>
+    <style>
+        .hoa-wrapper {
+            min-height: calc(100vh - 48px);
+            background-color: #060606;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px #000000;
+            -webkit-animation: rainbow 5s infinite;
+            -ms-animation: rainbow 5s infinite;
+            animation: rainbow 5s infinite;
+        }
+
+        .hoa-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.75rem;
+            padding: 0.5rem;
+        }
+
+        .hoa-card {
+            background: #0E0E0E;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hoa-image {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            border-bottom: 1px solid #2a2a2a;
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hoa-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .hoa-content {
+            padding: 0.5rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hoa-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px #000000;
+            -webkit-animation: rainbow 5s infinite;
+            -ms-animation: rainbow 5s infinite;
+            animation: rainbow 5s infinite;
+            text-align: center;
+            width: 100%;
+        }
+
+        .hoa-description {
+            color: #b0b0b0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            flex-grow: 1;
+            max-height: calc(1.5rem * 6);
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding-right: 0.5rem;
+            padding-left: 0.5rem;
+            text-align: center;
+            width: 100%;
+            white-space: pre-line !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            hyphens: auto !important;
+            scrollbar-width: thin !important;
+            -ms-overflow-style: auto !important;
+        }
+
+        .hoa-description::-webkit-scrollbar {
+            display: block !important;
+            width: 6px !important;
+        }
+        
+        .hoa-description::-webkit-scrollbar-track {
+            background: #111 !important;
+        }
+        
+        .hoa-description::-webkit-scrollbar-thumb {
+            background-color: #333 !important;
+            border-radius: 0 !important;
+        }
+
+        .hoa-description a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .hoa-description a:hover {
+            text-decoration: underline;
+        }
+
+        @-webkit-keyframes rainbow {
+            0%{color: red;}
+            17%{color: orange;}
+            33%{color: yellow;}
+            50%{color: green;}
+            67%{color: blue;}
+            84%{color: purple;}
+            100%{color: red;}
+        }
+        @-ms-keyframes rainbow {
+            0%{color: red;}
+            17%{color: orange;}
+            33%{color: yellow;}
+            50%{color: green;}
+            67%{color: blue;}
+            84%{color: purple;}
+            100%{color: red;}
+        }
+        @keyframes rainbow {
+            0%{color: red;}
+            17%{color: orange;}
+            33%{color: yellow;}
+            50%{color: green;}
+            67%{color: blue;}
+            84%{color: purple;}
+            100%{color: red;}
+        }
+
+        .sparkle {
+            pointer-events: none;
+            position: fixed;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 8px;
+            animation: sparkle-fade 0.8s forwards;
+            z-index: 1000;
+            text-shadow: 0 0 3px currentColor;
+        }
+
+        @keyframes sparkle-fade {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(0.9) translateY(-10px);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.6) translateY(-20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .hoa-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.75rem;
+            }
+
+            .hoa-content {
+                padding: 1rem;
+            }
+
+            .hoa-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                text-align: center;
+                z-index: 1000;
+                padding: 0.5rem 0;
+                margin-top: 73px;
+            }
+
+            .hoa-wrapper {
+                padding-top: 88px;
+            }
+        }
+        </style>
+</head>
+<body>
+    <audio id="hoa-audio" src="/static/vilebin.mp3" autoplay style="display:none"></audio>
+    <div class="hoa-wrapper">
+        <div class="container">
+            <h1 class="page-title">Hall of Autism</h1>
+            <div class="hoa-grid">
+                {% for post in hoa_data %}
+                <div class="hoa-card">
+                    <div class="hoa-image">
+                        <img src="/hoa/{{ post.id }}" alt="{{ post.title }}">
+                    </div>
+                    <div class="hoa-content">
+                        <h2 class="hoa-name rainbow"><b>{{ post.title }}</b></h2>
+                        <div class="hoa-description">{{ post.description | safe }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            const sparkleChars = ['✦', '✧', '✯', '✬', '✫', '*'];
+            const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+            let mouseX = 0;
+            let mouseY = 0;
+            let isMoving = false;
+            let movementTimeout = null;
+            let sparkleInterval = null;
+
+            function createSparkle() {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                
+                const offsetX = (Math.random() - 0.5) * 20;
+                const offsetY = (Math.random() - 0.5) * 20;
+                
+                sparkle.style.left = (mouseX + offsetX) + 'px';
+                sparkle.style.top = (mouseY + offsetY) + 'px';
+                sparkle.style.color = colors[Math.floor(Math.random() * colors.length)];
+                sparkle.textContent = sparkleChars[Math.floor(Math.random() * sparkleChars.length)];
+                
+                document.body.appendChild(sparkle);
+                
+                setTimeout(() => {
+                    sparkle.remove();
+                }, 800);
+            }
+
+            function updateMousePosition(e) {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                
+                if (!isMoving) {
+                    isMoving = true;
+                    sparkleInterval = setInterval(createSparkle, 50);
+                }
+                
+                if (movementTimeout) {
+                    clearTimeout(movementTimeout);
+                }
+                
+                movementTimeout = setTimeout(() => {
+                    isMoving = false;
+                    if (sparkleInterval) {
+                        clearInterval(sparkleInterval);
+                        sparkleInterval = null;
+                    }
+                }, 100);
+            }
+
+            function stopSparkles() {
+                isMoving = false;
+                if (sparkleInterval) {
+                    clearInterval(sparkleInterval);
+                    sparkleInterval = null;
+                }
+                if (movementTimeout) {
+                    clearTimeout(movementTimeout);
+                    movementTimeout = null;
+                }
+            }
+
+            document.addEventListener('mousemove', updateMousePosition);
+            document.addEventListener('mouseleave', stopSparkles);
+
+            window.addEventListener('beforeunload', () => {
+                document.removeEventListener('mousemove', updateMousePosition);
+                document.removeEventListener('mouseleave', stopSparkles);
+                stopSparkles();
+            });
+        })();
+
+        (function () {
+            const hoaAudio = document.getElementById('hoa-audio');
+            hoaAudio.volume = 0.5;
+
+            function catchHandler() {
+                let inputListener;
+                inputListener = function () {
+                    hoaAudio.play();
+                    document.removeEventListener('mousedown', inputListener);
+                    document.removeEventListener('keydown', inputListener);
+                };
+
+                document.addEventListener('mousedown', inputListener);
+                document.addEventListener('keydown', inputListener);
+            }
+
+            if (hoaAudio.readyState > 1) {
+                hoaAudio.play().catch(catchHandler);
+            } else {
+                hoaAudio.addEventListener('canplay', function () {
+                    hoaAudio.play().catch(catchHandler);
+                });
+            }
+        })();
+    </script>
+</body>
+</html>
+{% endblock %}

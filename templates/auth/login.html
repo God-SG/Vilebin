@@ -1,0 +1,150 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Login | Vilebin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="robots" content="noindex">
+</head>
+    <style>
+        .login-container {
+            max-width: 500px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .login-container h1 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #888;
+            margin-bottom: 8px;
+            font-size: 13.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            background: #282828;
+            border: 1px solid #282828;
+            color: #fff;
+            font-size: 13.5px;
+            box-sizing: border-box;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 8px;
+            background: #282828;
+            border: 1px solid #282828;
+            color: #fff;
+            font-size: 13.5px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-sizing: border-box;
+            transition: background-color 0.2s;
+        }
+
+        .login-button:hover {
+            background: #3D3D3D;
+        }
+
+        .error-message {
+            color: #ff0000;
+            font-size: 13.5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        input {
+            outline: none;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        .cf-turnstile {
+            margin: 30px 0 15px 0;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+
+<body>
+    {% endblock %}
+
+    {% block bottom %}
+    <div class="login-container">
+        <h1>Login</h1>
+        {% if error %}
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
+        <noscript>
+            <p class="error-message">Vilebin requires JavaScript to function correctly.</p>
+        </noscript>
+        <div id="error-msg" class="error-message"></div>
+        
+        <form action="" method="POST" id="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="Username" pattern="[A-Za-z0-9]+" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="passwordInput" name="password" class="form-input" placeholder="Password" required>
+            </div>
+            
+            <div class="cf-turnstile" data-theme="dark" data-sitekey="0x4AAAAAAC3WTrckRnu_OvfY"></div>
+            
+            <button type="submit" class="login-button">Login</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('login-form');
+
+            form.addEventListener('submit', function(event) {
+                const cfToken = turnstile.getResponse();
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = 'cf-recaptcha-response';
+                tokenInput.value = cfToken;
+                form.appendChild(tokenInput);
+            });
+            
+            document.getElementById('username').addEventListener('input', function(e) {
+                const username = e.target.value;
+                const regex = /^[A-Za-z0-9]*$/;
+                
+                if (username.length > 20) {
+                    e.target.value = username.slice(0, 20);
+                }
+                
+                if (!regex.test(username)) {
+                    e.target.value = username.replace(/[^A-Za-z0-9]/g, '');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

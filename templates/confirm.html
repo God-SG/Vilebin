@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vilebin | Confirm</title>
+  <meta name="robots" content="noindex">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;600;700&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #fff;
+      font-family: 'Barlow', Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(to bottom, transparent, transparent 2px, rgba(255,255,255,0.012) 2px, rgba(255,255,255,0.012) 4px);
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 860px;
+      animation: fadeIn 0.5s ease both;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .logo { display: block; margin: 0 auto 14px auto; max-width: 130px; width: 100%; height: auto; }
+    .badge { display: inline-block; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px; color: #666; border: 1px solid #1e1e1e; padding: 3px 9px; border-radius: 4px; margin-bottom: 10px; text-transform: uppercase; }
+    h1 { font-size: 21px; font-weight: 700; margin-bottom: 5px; line-height: 1.3; }
+    .sub { font-size: 13px; color: #888; margin-bottom: 16px; line-height: 1.5; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; text-align: left; }
+
+    .box { background: #060606; border: 1px solid #1a1a1a; border-radius: 10px; padding: 14px 16px; }
+    .box h2 { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: #444; margin-bottom: 10px; font-family: 'Share Tech Mono', monospace; }
+    .box ul { list-style: none; padding: 0; }
+    .box ul li { font-size: 12.5px; color: #bbb; padding: 5px 0 5px 13px; border-bottom: 1px solid #0f0f0f; line-height: 1.45; position: relative; }
+    .box ul li:last-child { border-bottom: none; padding-bottom: 0; }
+    .box ul li::before { content: ''; position: absolute; left: 0; top: 12px; width: 4px; height: 4px; background: #333; border-radius: 50%; }
+
+    a { color: #aaa; text-decoration: underline; text-underline-offset: 3px; }
+    a:hover { color: #fff; }
+
+    .buttons { display: flex; gap: 10px; justify-content: center; }
+    .btn { flex: 1; max-width: 200px; padding: 11px 16px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; border: none; transition: opacity 0.15s, transform 0.1s; font-family: 'Barlow', Arial, sans-serif; }
+    .btn:active { transform: scale(0.97); }
+    .btn-agree { background: #fff; color: #000; }
+    .btn-agree:hover { opacity: 0.85; }
+    .btn-leave { background: transparent; color: #555; border: 1px solid #1e1e1e; }
+    .btn-leave:hover { border-color: #333; color: #888; }
+    .muted { font-size: 11px; color: #2e2e2e; margin-top: 12px; font-family: 'Share Tech Mono', monospace; letter-spacing: 0.5px; }
+
+    @media (max-width: 640px) {
+      html, body { overflow: auto; height: auto; }
+      body { align-items: flex-start; padding: 16px 14px; }
+
+      .logo { max-width: 70px; margin-bottom: 10px; }
+      .badge { font-size: 9px; padding: 2px 7px; margin-bottom: 8px; }
+      h1 { font-size: 16px; margin-bottom: 4px; }
+      .sub { font-size: 11.5px; margin-bottom: 12px; }
+
+      .grid { grid-template-columns: 1fr; gap: 7px; margin-bottom: 12px; }
+      .box { padding: 11px 13px; }
+      .box h2 { font-size: 8.5px; margin-bottom: 8px; }
+      .box ul li { font-size: 11.5px; padding: 4px 0 4px 12px; }
+      .box ul li::before { top: 10px; }
+
+      .buttons { gap: 8px; }
+      .btn { max-width: 100%; padding: 10px; font-size: 13px; }
+      .muted { font-size: 10px; margin-top: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <img src="/static/vilebin_logo.jpg" alt="Vilebin" class="logo">
+    <div class="badge">Content Notice</div>
+    <h1>Before you continue</h1>
+    <p class="sub">Vilebin is a user-generated content platform.<br>By entering, you acknowledge and accept the following.</p>
+
+    <div class="grid">
+      <div class="box">
+        <h2>You confirm that</h2>
+        <ul>
+          <li>You are 18 years of age or older</li>
+          <li>This platform hosts third-party content — Vilebin is not responsible for user submissions</li>
+          <li>Report abusive content via <a href="mailto:legal@vilebin.cx">legal@vilebin.cx</a></li>
+          <li>Content may include opinions, public info, and free speech protected material</li>
+        </ul>
+      </div>
+
+      <div class="box">
+        <h2>Applicable Legal Frameworks</h2>
+        <ul>
+          <li><strong style="color:#ddd">First Amendment</strong> to the United States Constitution — protects lawful speech</li>
+          <li><strong style="color:#ddd">47 U.S.C. § 230</strong> — intermediary protections for platforms hosting third-party content</li>
+        </ul>
+      </div>
+
+      <div class="box">
+        <h2>ICANN RAA Compliance</h2>
+        <ul>
+          <li>Abuse reports handled via <a href="mailto:legal@vilebin.cx">legal@vilebin.cx</a></li>
+          <li>Valid complaints actioned within 24–48 hours per registrar obligations</li>
+          <li>Platform cooperates with registrar mitigation procedures under the RAA framework</li>
+        </ul>
+      </div>
+    </div>
+
+    <form method="POST" action="/confirm?next={{ next }}" style="display:contents">
+      <div class="buttons">
+        <button type="submit" class="btn btn-agree">I Agree – Enter</button>
+        <button type="button" class="btn btn-leave" onclick="leave()">Leave</button>
+      </div>
+    </form>
+
+    <p class="muted">vilebin.cx · user generated content platform</p>
+  </div>
+
+  <script>
+    function leave() {
+      window.location.href = "https://duckduckgo.com";
+      setTimeout(() => { window.close(); }, 300);
+    }
+  </script>
+</body>
+</html>

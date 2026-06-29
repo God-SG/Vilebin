@@ -1,0 +1,187 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!doctype html>
+<html lang="en">
+<head>
+    <style>
+        .main-container {
+            margin-left: 260px;
+            color: #fff;
+            padding: 20px;
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                margin-left: 0;
+                padding-top: 75px;
+            }
+        }
+        
+        .stats-container {
+            float: left;
+            width: 500px;
+            margin-bottom: 20px;
+        }
+
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .stats-table th,
+        .stats-table td {
+            padding: 4px 8px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        
+        .stats-table th {
+            background: #212121;
+        }
+
+        .stats-table td:nth-child(2),
+        .stats-table td:nth-child(3),
+        .stats-table td:nth-child(4) {
+            width: 60px;
+        }
+
+        .stats-table th:nth-child(2),
+        .stats-table th:nth-child(3),
+        .stats-table th:nth-child(4) {
+            width: 60px;
+        }
+
+        .stats-table th:nth-child(5),
+        .stats-table td:nth-child(5) {
+            width: 60px;
+            text-align: right;
+        }
+
+        .stats-table th:nth-child(1),
+        .stats-table td:nth-child(1) {
+            width: 60px;
+        }
+
+        .low-flags {
+            background-color: #500;
+        }
+
+        .view-history {
+            color: #2A9FD6;
+            text-decoration: none;
+            float: right;
+        }
+
+        .view-history:hover {
+            text-decoration: underline;
+        }
+
+        .paste-link {
+            color: #2A9FD6 !important;
+            text-decoration: none;
+        }
+        
+        .paste-link:hover {
+            text-decoration: underline;
+        }
+        
+        .system-reporter {
+            color: #ff0000;
+            font-weight: bold;
+        }
+
+        .flags-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 12px;
+        }
+        
+        .flags-table th,
+        .flags-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+            height: 20px;
+            line-height: 20px;
+        }
+        
+        .flags-table th {
+            background: #212121;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+{% include 'admin/navbar.html' %}
+
+<main class="main-container">
+    <div class="stats-container">
+        <table class="stats-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Total</th>
+                    <th>Denied</th>
+                    <th>7 days</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for council in councils %}
+                <tr>
+                    <td>
+                        <a href="/user/{{ council.username }}"
+                        style="color:#87cefa; font-weight:bold; text-decoration-color: {{ council.color }};">
+                            <span style="color: {{ council.color }};">{{ council.username }}</span>
+                        </a>
+                    </td>
+                    <td>{{ council.total }}</td>
+                    <td>{{ council.denied }}</td>
+                    <td class="{% if council.week < 100 %}low-flags{% endif %}">{{ council.week }}</td>
+                    <td>
+                        <a href="/admin/logs/flags?staff={{ council.username }}" 
+                        class="view-history" target="_blank">History</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <table class="flags-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Flagged By</th>
+                <th>Flagged At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for flag in flags %}
+                {% if flag.status == 'pending' %}
+                <tr>
+                    <td> <a href="/admin/flags/{{ flag.id }}" class="paste-link">{{ flag.post }}</a></td>
+                    <td>
+                        <a href="/user/{{ flag.reporter }}" target="_blank" style="color: #87cefa; text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                            <span style="color: {{ flag.reportercolor }};">{{ flag.reporter }}</span> [Council]
+                        </a>
+                    </td>
+                    <td>{{ flag.date }}</td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            
+        </tbody>
+    </table>
+    
+</main>
+
+</body>
+</html>
+{% endblock %}

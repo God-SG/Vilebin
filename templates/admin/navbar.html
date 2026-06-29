@@ -1,0 +1,179 @@
+{% import "macros/admin/navbar.njk" as macros %}
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin | Vilebin</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<meta name="robots" content="noindex">
+<script type="text/javascript" src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<style>
+    .sidebar {
+        height: 100vh;
+        width: 250px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        background-color: #212121;
+        color: #fff;
+        overflow-y: auto;
+        padding-top: 45px;
+        transition: transform 0.3s ease;
+        z-index: 997;
+    }
+    .sidebar .title {
+        text-align: center;
+        font-size: 21px;
+        margin: 20px 0 10px 0;
+        font-weight: 800;
+    }
+    .sidebar a {
+        padding: 4px 25px;
+        text-decoration: none;
+        font-size: 16px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+    }
+    .sidebar a:hover, .sidebar a.active {
+        color: #808080;
+    }
+    .sidebar a i {
+        margin-right: 10px;
+        width: 20px;
+        text-align: center;
+    }
+    .submenu {
+        display: none;
+    }
+    .submenu.active {
+        display: block;
+    }
+    .submenu a {
+        padding-left: 45px;
+    }
+    .badge {
+        background-color: #ff0000;
+        color: white;
+        font-weight: bold;
+        font-size: 10px;
+        min-width: 14px;
+        height: 14px;
+        line-height: 14px;
+        text-align: center;
+        padding: 0 3px;
+        margin-left: 6px;
+        display: inline-block;
+        position: relative;
+        top: -1px;
+    }
+
+    .mobile-topbar {
+        display: none;
+        position: fixed;
+        top: 48px;
+        left: 0;
+        right: 0;
+        height: 50px;
+        background-color: #212121;
+        z-index: 998;
+        align-items: center;
+        padding: 0 15px;
+    }
+    .mobile-topbar .mobile-title {
+        color: #fff;
+        font-size: 18px;
+        font-weight: 800;
+        flex: 1;
+        text-align: center;
+    }
+    .burger {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .burger span {
+        display: block;
+        width: 22px;
+        height: 2px;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+    .burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .burger.open span:nth-child(2) { opacity: 0; }
+    .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 996;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .mobile-topbar {
+            display: flex;
+        }
+        .sidebar {
+            transform: translateX(-100%);
+            padding-top: 110px;
+        }
+        .sidebar .title {
+            display: none;
+        }
+        .sidebar.open {
+            transform: translateX(0);
+        }
+        .nav-space {
+            display: none;
+        }
+    }
+</style>
+
+<div class="mobile-topbar">
+    <button class="burger" id="burgerBtn" onclick="toggleSidebar()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="mobile-title">Admin</div>
+</div>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="nav-space"></div>
+<div class="sidebar" id="sidebar">
+    <div class="title">Admin</div>
+    {{ macros.nav('/admin', 'fa-home', 'Home', null, path) }}
+    {{ macros.nav('/admin/users', 'fa-users', 'Users', null, path) }}
+    {{ macros.nav('/admin/review', 'fa-exclamation-triangle', 'Spam', 'badge-spam', path) }}
+    {{ macros.nav('/admin/edits', 'fa-edit', 'Edits', 'badge-edits', path) }}
+    {{ macros.nav('/admin/flags', 'fa-flag', 'Flags', 'badge-flags', path) }}
+
+    {% if status in ['admin', 'founder', 'manager'] %}
+    {{ macros.nav('/admin/blacklist', 'fa-list', 'Blacklist', null, path) }}
+    {{ macros.nav('/admin/logs', 'fa-warning', 'Logs', null, path) }}
+    {% endif %}
+
+    {% if status in ['admin', 'founder'] %}
+    {{ macros.nav('/admin/settings', 'fa-gear', 'Settings', null, path) }}
+    {% endif %}
+</div>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const burger = document.getElementById('burgerBtn');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+        burger.classList.toggle('open');
+    }
+</script>

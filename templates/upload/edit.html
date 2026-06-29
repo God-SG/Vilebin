@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit | Vilebin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/static/nav.css">
+</head>
+<body class="bin">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .paste-container {
+            display: flex;
+            height: 100vh;
+        }
+        .content-area {
+            flex: 1;
+            background: #0C0C0C;
+            position: relative;
+            min-height: fit-content;
+        }
+        .content-area textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: monospace;
+            font-size: 13px;
+            padding: 10px 20px;
+            margin: 0;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            resize: none;
+            box-sizing: border-box;
+        }
+        @media screen and (max-width: 768px) {
+            .content-area textarea {
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
+        .sidebar {
+            width: 280px;
+            background: #181818;
+            padding: 10px 12px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            transition: transform 0.3s ease;
+            text-align: center;
+            overflow-y: auto;
+        }
+        .sidebar.hidden {
+            transform: translateX(100%);
+        }
+        .toggle-sidebar {
+            position: fixed;
+            right: 304px;
+            top: 0;
+            background: #181818;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1000;
+            padding: 6px 10px;
+            border-radius: 0;
+            transition: right 0.3s ease;
+        }
+        .toggle-sidebar:hover {
+            background: #222;
+        }
+        .sidebar.hidden ~ .toggle-sidebar {
+            right: 0;
+        }
+        .ascii-art {
+            color: #fff;
+            font-family: monospace;
+            white-space: pre;
+            font-size: 14px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .info-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .info-row {
+            margin-bottom: 10px;
+            color: #fff;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+        .info-row label {
+            display: inline-block;
+            width: 85px;
+            font-weight: bold;
+        }
+        .info-row .value {
+            color: #fff;
+            text-align: right;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 5px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .form-group input[type="text"] {
+            width: 256px;
+            background: #545454;
+            border: 1px solid #282828;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 13px;
+            border-radius: 3px;
+        }
+        .form-group input::placeholder {
+            color: #bfbfbf;
+        }
+        .form-group input:focus {
+            outline: none;
+        }
+        .button {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 3px;
+            margin-bottom: 1px;
+            transition: all 0.2s;
+        }
+        .button:hover {
+            background: #404040;
+        }
+        .separator {
+            border-top: 1px solid #747474;
+            margin: 15px 0;
+        }
+        *:focus {
+            outline: none !important;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+
+        input {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        *:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        input, textarea, select {
+            font-size: 16px !important;
+        }
+    </style>
+
+    <div class="paste-container">
+        <div class="content-area">
+            <textarea id="content" spellcheck="false">{{ content }}</textarea>
+        </div>
+        <div class="sidebar">
+            <a href="/" style="text-decoration: none;"><div class="ascii-art" style="text-decoration: none; font-size: 13px; line-height: 1.1;">__      ___ _      _     _       
+\ \    / (_) |    | |   (_)      
+ \ \  / / _| | ___| |__  _ _ __  
+  \ \/ / | | |/ _ \ '_ \| | '_ \ 
+   \  /  | | |  __/ |_) | | | | |
+    \/   |_|_|\___|_.__/|_|_| |_|</div></a>
+
+            <div id="error-message" style="color: #ff0000; margin-bottom: 15px; font-size: 13px; display: none;"></div>
+
+            <div class="info-group">
+                <div class="info-row">
+                    <label>Title:</label>
+                    <span class="value">
+                        {% if is_pinned %}
+                        <i class="fas fa-thumbtack visibility-icon"></i>
+                        {% endif %}
+                        {{ pastname }}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <label>Created:</label>
+                    <span class="value">
+                        {{ formatted_date }}
+                    </span>
+                </div>
+                <div class="info-row">
+                    <label>Author:</label>
+                    <span class="value">
+                        {% set s = styles.get(owner.status, styles['user']) %}
+                        {% if owner.status == 'anonymous' %}
+                            <span style="float: right;">{{ owner.login }}</span>
+                        {% else %}
+                            <a href="/user/{{ owner.login }}" style="float: right; {{ s.rankStyle }}">
+                                {% if owner.color %}
+                                    <span style="color: {{ owner.color }};">{{ owner.login }}</span>
+                                {% else %}
+                                    {{ owner.login }}
+                                {% endif %}
+                                {% if s.suffix %} {{ s.suffix }}{% endif %}
+                            </a>
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <div class="info-row">
+                    <label>Views:</label>
+                    <span class="value">
+                        {{ view }}
+                    </span>
+                </div>
+
+                {% if commentsstatus %}
+                <div class="info-row">
+                    <label>Comments:</label>
+                    <span class="value comment-count">
+                        {{ comments|length }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="separator" style="margin-bottom: 10px;"></div>
+
+            <div class="form-group">
+                <label>Reason (Optional):</label>
+                <input type="text" id="reason" value="" placeholder="Reason (Optional)">
+            </div>
+            <div class="separator"></div>
+
+            <button class="button" onclick="savePaste()">Save</button>
+            <div style="height: 5px"></div>
+            <button class="button" onclick="window.location.href='/upload/{{ pastname_c }}'">Back</button>
+        </div>
+        <button class="toggle-sidebar">☰</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.querySelector('.sidebar');
+            const toggleButton = document.querySelector('.toggle-sidebar');
+            
+            toggleButton.addEventListener('click', function() {
+                sidebar.classList.toggle('hidden');
+            });
+        });
+
+        document.getElementById('content').addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                
+                var start = this.selectionStart;
+                var end = this.selectionEnd;
+                
+                this.value = this.value.substring(0, start) + '\t' + this.value.substring(end);
+                
+                this.selectionStart = this.selectionEnd = start + 1;
+            }
+        });
+
+        async function savePaste() {
+            const content = document.getElementById('content').value;
+            const titleInput = document.getElementById('title');
+            const reason = document.getElementById('reason').value;
+            const errorMessage = document.getElementById('error-message');
+            
+            errorMessage.style.display = 'none';
+            
+            try {
+                const response = await fetch(`/api/editPaste?pasteID={{ id }}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: titleInput ? titleInput.value : undefined,
+                        content: content,
+                        reason: reason || undefined
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    window.location.href = '/upload/{{ pastname_c }}';
+                } else {
+                    errorMessage.textContent = data.error || 'Failed to save paste';
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'An error occurred while saving';
+                errorMessage.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

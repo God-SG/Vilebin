@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="data:,">
+    <title>{{ title }} | Vilebin</title>
+    <link rel="stylesheet" href="/static/nav.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="robots" content="noindex">
+</head>
+
+<body class="bin" style="margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column;">
+    <style>
+                .paste-container {
+            display: flex;
+            flex: 1;
+        }
+        .content-area {
+            flex: 1;
+            background: #0C0C0C;
+            position: relative;
+            padding-bottom: 10px;
+			min-height: fit-content;
+        }
+        .content-area pre {
+            width: 100%;
+            height 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: monospace;
+            font-size: 13px;
+            padding: 10px 20px;
+            margin: 0;
+            margin-top: 10px;
+            white-space: pre;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            word-wrap: break-word;
+            overflow-y: auto;
+        }
+        .content-area pre a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .sidebar {
+            width: 280px;
+            background: #181818;
+            padding: 10px 12px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            text-align: center;
+            overflow-y: auto;
+        }
+        .button {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        .button.approve {
+            background: #557C51;
+        }
+        .button.reject {
+            background: #753B3B;
+        }
+        .separator {
+            border-top: 2px solid #747474;
+            margin: 15px 0;
+        }
+        *:focus {
+            outline: none !important;
+        }
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+        }
+        .system-reporter {
+            color: #ff0000;
+            font-weight: bold;
+        }
+        .title-link {
+            color: inherit;
+            text-decoration: none;
+        }
+        .title-link:hover {
+            text-decoration: underline;
+        }
+        a {
+            text-decoration: none;
+        }
+        .info-group {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .info-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 5px;
+            font-size: 13px;
+            text-align: left;
+            font-weight: bold;
+        }
+        .info-group .value {
+            color: #bababa;
+            font-size: 13px;
+            text-align: right;
+        }
+        .info-group .value a {
+            color: inherit;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+    </style>
+
+        <div class="paste-container">
+        <div class="content-area">
+            <pre>{{ content }}</pre>
+        </div>
+        <div class="sidebar">
+            <button onclick="goBack()" class="button" style="margin: 10px 0 20px 0;">← Back</button>
+
+            <div style="margin-top: 0;">
+                <div class="info-group">
+                    <div class="info-row">
+                        <label>Title:</label>
+                        <span class="value"><a href="/upload/{{ title_c }}" target="_blank" class="title-link">{{ title }}</a></span>
+                    </div>
+                    <div class="info-row">
+                        <label>Flagged:</label>
+                        <span class="value">{{ date }}</span>
+                    </div>
+                    <div class="info-row">
+                        <label>Model:</label>
+                        <span class="value">gpt-4.1-mini</span>
+                    </div>
+                    <div class="info-row">
+                        <label>Confidence:</label>
+                        <span class="value">{{ confidence }}</span>
+                    </div>
+                    
+                    <div class="info-row" style="flex-direction: column; align-items: flex-start;">
+                        <label>Reason:</label>
+                        <span class="value" style="text-align: left; margin-top: 4px;">{{ reason }}</span>
+                    </div>
+                    
+                </div>
+
+                <div class="separator"></div>
+
+                <button class="button reject" onclick="reviewSpam(&#39;1&#39;)">Spam!</button>
+                <button class="button approve" onclick="reviewSpam(&#39;0&#39;)">Legit</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function reviewSpam(verdict) {
+            fetch(`/api/spamReview/{{ id }}?verdict=${verdict}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.reload();
+                    }
+                });
+        }
+
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/admin';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,235 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Register | Vilebin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="robots" content="noindex">
+</head>
+    <style>
+        .login-container {
+            max-width: 500px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .login-container h1 {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #888;
+            margin-bottom: 8px;
+            font-size: 13.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 8px;
+            background: #282828;
+            border: 1px solid #282828;
+            color: #fff;
+            font-size: 13.5px;
+            box-sizing: border-box;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 8px;
+            background: #282828;
+            border: 1px solid #282828;
+            color: #fff;
+            font-size: 13.5px;
+            cursor: pointer;
+            margin-top: 15px;
+            box-sizing: border-box;
+            transition: background-color 0.2s;
+        }
+
+        .login-button:hover {
+            background: #3D3D3D;
+        }
+
+        .error-message {
+            color: #ff0000;
+            font-size: 13.5px;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        input {
+            outline: none;
+        }
+
+        input:focus {
+            outline: none;
+        }
+
+        .cf-turnstile {
+            margin: 30px 0 15px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        .username-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .username-container .form-input {
+            padding-right: 35px;
+        }
+
+        .username-status {
+            position: absolute;
+            right: 8px;
+            display: none;
+        }
+
+        .username-status .material-icons {
+            font-size: 20px;
+        }
+
+        .username-status.available .material-icons {
+            color: #39ff14;
+        }
+
+        .username-status.taken .material-icons {
+            color: #ff0000;
+        }
+    </style>
+</head>
+
+<body>
+    {% endblock %}
+
+    {% block bottom %}
+    <div class="login-container">
+        <h1>Create Account</h1>
+        {% if error %}
+        <p class="error-message">{{ error }}</p>
+        {% endif %}
+        <noscript>
+            <p class="error-message">Vilebin requires JavaScript to function correctly.</p>
+        </noscript>
+        <div id="error-msg" class="error-message"></div>
+        
+        <form action="" method="POST" id="register-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <div class="username-container">
+                    <input type="text" id="username" name="username" class="form-input" placeholder="Username" maxlength="20" pattern="[A-Za-z0-9]+" required>
+                    <div class="username-status available">
+                        <i class="material-icons">check</i>
+                    </div>
+                    <div class="username-status taken">
+                        <i class="material-icons">clear</i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email (Optional)</label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="Email">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Password" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password_confirm">Confirm Password</label>
+                <input type="password" id="password_confirm" name="password_confirm" class="form-input" placeholder="Confirm Password" required>
+            </div>
+            
+            <div class="cf-turnstile" data-theme="dark" data-sitekey="0x4AAAAAAC3WTrckRnu_OvfY"></div>
+            
+            <button type="submit" class="login-button">Register</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('register-form');
+            let checkUsernameTimeout;
+            const usernameInput = document.getElementById('username');
+            const availableStatus = document.querySelector('.username-status.available');
+            const takenStatus = document.querySelector('.username-status.taken');
+
+            form.addEventListener('submit', function(event) {
+                const cfToken = turnstile.getResponse();
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = 'cf-recaptcha-response';
+                tokenInput.value = cfToken;
+                form.appendChild(tokenInput);
+            });
+
+            usernameInput.addEventListener('input', function() {
+                const username = this.value.trim();
+                
+                if (checkUsernameTimeout) {
+                    clearTimeout(checkUsernameTimeout);
+                }
+
+                availableStatus.style.display = 'none';
+                takenStatus.style.display = 'none';
+
+                if (username.length > 0) {
+                    if (username.length < 2) {
+                        availableStatus.style.display = 'none';
+                        takenStatus.style.display = 'block';
+                        return;
+                    }
+
+                    checkUsernameTimeout = setTimeout(async () => {
+                        try {
+                            const response = await fetch(`/api/checkUsername?username=${encodeURIComponent(username)}`);
+                            const data = await response.json();
+                            
+                            if (data.available) {
+                                availableStatus.style.display = 'block';
+                                takenStatus.style.display = 'none';
+                            } else {
+                                availableStatus.style.display = 'none';
+                                takenStatus.style.display = 'block';
+                            }
+                        } catch (error) {
+                            console.error('Error checking username:', error);
+                        }
+                    }, 300);
+                }
+            });
+
+            document.getElementById('username').addEventListener('input', function(e) {
+                const username = e.target.value;
+                const regex = /^[A-Za-z0-9]*$/;
+                
+                if (username.length > 20) {
+                    e.target.value = username.slice(0, 20);
+                }
+                
+                if (!regex.test(username)) {
+                    e.target.value = username.replace(/[^A-Za-z0-9]/g, '');
+                }
+            });
+        });
+    </script>
+{% endblock %}

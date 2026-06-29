@@ -1,0 +1,659 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        .main-container {
+            margin-left: 260px;
+            color: #fff;
+            padding-top: 25px;
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                margin-left: 0;
+                padding-top: 75px;
+            }
+        }
+        
+        .hoa-section, .announcements-section {
+            background: #1a1a1a;
+            margin: 10px 20px;
+        }
+
+        .hoa-header, .announcements-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 15px;
+            border-bottom: 1px solid #333;
+            min-height: 40px;
+        }
+
+        .hoa-header h2, .announcements-header h2 {
+            font-size: 16px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .hoa-content, .announcements-content {
+            display: none;
+            padding: 15px;
+        }
+
+        .hoa-content.active, .announcements-content.active {
+            display: block;
+        }
+
+        .add-hoa-btn, .add-announcement-btn {
+            background: #bb71e4;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .add-hoa-btn:hover, .add-announcement-btn:hover {
+            background: #9b4fc4;
+        }
+
+        .hoa-list, .announcements-list {
+            margin-top: 15px;
+        }
+
+        .hoa-item, .announcement-item {
+            background: #252525;
+            padding: 10px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .announcement-item .message {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .announcement-item .color-preview {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .hoa-item span, .announcement-item span {
+            font-weight: bold;
+        }
+
+        .hoa-item button, .announcement-item button {
+            border: none;
+            padding: 4px 8px;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            margin-left: 5px;
+        }
+
+        .chevron {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .chevron.active {
+            transform: rotate(180deg);
+        }
+
+        .hoa-form, .announcement-form {
+            background: #252525;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .hoa-form.active, .announcement-form.active {
+            display: block;
+        }
+
+        .hoa-form input[type="text"],
+        .hoa-form textarea,
+        .announcement-form input[type="text"],
+        .announcement-form textarea,
+        .announcement-form input[type="color"] {
+            width: 100%;
+            background: #1a1a1a;
+            border: none;
+            color: white;
+            padding: 8px;
+            margin-bottom: 10px;
+            font-family: inherit;
+            outline: none;
+        }
+
+        .announcement-form input[type="color"] {
+            height: 40px;
+            padding: 0;
+            cursor: pointer;
+        }
+
+        .hoa-form input[type="text"]:focus,
+        .hoa-form textarea:focus,
+        .announcement-form input[type="text"]:focus,
+        .announcement-form textarea:focus,
+        .announcement-form input[type="color"]:focus {
+            outline: none;
+            border: none;
+        }
+
+        .hoa-form textarea,
+        .announcement-form textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-buttons button {
+            border: none;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .save-btn {
+            background: #bb71e4;
+            color: white;
+        }
+
+        .cancel-btn {
+            background: #333;
+            color: white;
+        }
+
+        .image-upload {
+            margin-bottom: 10px;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .custom-file-upload {
+            background: #333;
+            color: white;
+            padding: 6px 12px;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .custom-file-upload:hover {
+            background: #444;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    {% include 'admin/navbar.html' %}
+
+    <main class="main-container">
+        <div class="announcements-section">
+            <div class="announcements-header" onclick="toggleAnnouncements()">
+                <h2>Announcements</h2>
+                <span class="chevron">▼</span>
+            </div>
+            <div class="announcements-content">
+                <button class="add-announcement-btn" onclick="addNewAnnouncement()">Add Announcement</button>
+                <div class="announcement-form">
+                    <div class="error-message"></div>
+                    <input type="text" id="announcementMessage" placeholder="Message" onkeyup="validateAnnouncementForm()">
+                    <input type="color" id="announcementColor" onchange="validateAnnouncementForm()">
+                    <div class="form-buttons">
+                        <button class="save-btn" onclick="saveAnnouncement()">Save</button>
+                        <button class="cancel-btn" onclick="cancelAnnouncement()">Cancel</button>
+                    </div>
+                </div>
+                <div class="announcements-list">
+                    <!-- LOAD -->
+                </div>
+            </div>
+        </div>
+
+        <div class="hoa-section">
+            <div class="hoa-header" onclick="toggleHOA()">
+                <h2>HOA</h2>
+                <span class="chevron">▼</span>
+            </div>
+            <div class="hoa-content">
+                <button class="add-hoa-btn" onclick="addNewHOA()">Add HOA</button>
+                <div class="hoa-form">
+                    <div class="error-message"></div>
+                    <input type="text" id="hoaTitle" placeholder="Title" onkeyup="validateForm()">
+                    <textarea id="hoaContent" placeholder="Description" onkeyup="validateForm()"></textarea>
+                    <div class="image-upload">
+                        <label class="custom-file-upload">
+                            <input type="file" id="hoaImage" accept="image/*" onchange="previewImage(event)">
+                            Choose Image
+                        </label>
+                        <img id="imagePreview" class="image-preview">
+                    </div>
+                    <div class="form-buttons">
+                        <button class="save-btn" onclick="saveHOA()">Save</button>
+                        <button class="cancel-btn" onclick="cancelHOA()">Cancel</button>
+                    </div>
+                </div>
+                <div class="hoa-list">
+                    <!-- LOAD -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let currentEditId = null;   
+        let currentEntries = {{ currentEntries | safe }};
+        let currentAnnouncements = {{ currentAnnouncements | safe }};
+
+        currentAnnouncements = currentAnnouncements.reverse();
+
+        function toggleHOA() {
+            const content = document.querySelector('.hoa-content');
+            const chevron = document.querySelector('.chevron');
+            content.classList.toggle('active');
+            chevron.classList.toggle('active');
+        }
+
+        function toggleAnnouncements() {
+            const content = document.querySelector('.announcements-content');
+            const chevron = document.querySelector('.announcements-header .chevron');
+            content.classList.toggle('active');
+            chevron.classList.toggle('active');
+        }
+
+        function showError(message) {
+            const errorDiv = document.querySelector('.error-message');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+        }
+
+        function clearError() {
+            const errorDiv = document.querySelector('.error-message');
+            errorDiv.classList.remove('active');
+        }
+
+        function validateForm() {
+            const title = document.getElementById('hoaTitle').value;
+            const content = document.getElementById('hoaContent').value;
+            
+            if (!title && !content) {
+                showError('Title and content are required');
+                return false;
+            } else if (!title) {
+                showError('Title is required');
+                return false;
+            } else if (!content) {
+                showError('Description is required');
+                return false;
+            }
+            
+            clearError();
+            return true;
+        }
+
+        function validateAnnouncementForm() {
+            const message = document.getElementById('announcementMessage').value;
+            const color = document.getElementById('announcementColor').value;
+            
+            if (!message) {
+                showError('Message is required');
+                return false;
+            }
+            
+            clearError();
+            return true;
+        }
+
+        function previewImage(event) {
+            const preview = document.getElementById('imagePreview');
+            const file = event.target.files[0];
+            
+            if (file) {
+                preview.style.display = 'block';
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addNewHOA() {
+            currentEditId = null;
+            const form = document.querySelector('.hoa-form');
+            form.classList.add('active');
+            document.getElementById('hoaTitle').value = '';
+            document.getElementById('hoaContent').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('hoaImage').value = '';
+            clearError();
+        }
+
+        function addNewAnnouncement() {
+            currentEditId = null;
+            const form = document.querySelector('.announcement-form');
+            form.classList.add('active');
+            document.getElementById('announcementMessage').value = '';
+            document.getElementById('announcementColor').value = '#ffffff';
+            clearError();
+        }
+
+        function cancelHOA() {
+            currentEditId = null;
+            const form = document.querySelector('.hoa-form');
+            form.classList.remove('active');
+            document.getElementById('hoaTitle').value = '';
+            document.getElementById('hoaContent').value = '';
+            document.getElementById('hoaImage').value = '';
+            document.getElementById('imagePreview').style.display = 'none';
+            document.getElementById('imagePreview').src = '';
+            clearError();
+        }
+
+        function cancelAnnouncement() {
+            currentEditId = null;
+            const form = document.querySelector('.announcement-form');
+            form.classList.remove('active');
+            document.getElementById('announcementMessage').value = '';
+            document.getElementById('announcementColor').value = '#ffffff';
+            clearError();
+        }
+
+        function editHOA(id) {
+            currentEditId = id;
+            const form = document.querySelector('.hoa-form');
+            form.classList.add('active');
+            
+            const entry = currentEntries.find(e => e.hoaID === id);
+            if (entry) {
+                document.getElementById('hoaTitle').value = entry.name;
+                document.getElementById('hoaContent').value = entry.description;
+                
+                const preview = document.getElementById('imagePreview');
+                preview.style.display = 'block';
+                preview.src = `/hoa/${id}`;
+                
+                document.getElementById('hoaImage').value = '';
+                clearError();
+            }
+        }
+
+        function editAnnouncement(id) {
+            currentEditId = id;
+            const form = document.querySelector('.announcement-form');
+            form.classList.add('active');
+            
+            const announcement = currentAnnouncements.find(e => e.announcementID === id);
+            if (announcement) {
+                document.getElementById('announcementMessage').value = announcement.message;
+                document.getElementById('announcementColor').value = announcement.color;
+                clearError();
+            }
+        }
+
+        function saveHOA() {
+            if (!validateForm()) return;
+
+            const title = document.getElementById('hoaTitle').value;
+            const content = document.getElementById('hoaContent').value;
+            const imageFile = document.getElementById('hoaImage').files[0];
+
+            const formData = new FormData();
+            formData.append('title', title);
+            formData.append('content', content);
+            if (imageFile) formData.append('image', imageFile);
+            if (currentEditId) formData.append('hoaID', currentEditId);
+
+            const url = currentEditId ? '/api/editHOA' : '/api/addHOA';
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    showError(data.error || 'Failed to save HOA entry');
+                    return;
+                }
+
+                const hoa = data.hoa;
+                const hoaList = document.querySelector('.hoa-list');
+                const existingEntry = hoaList.querySelector(`[data-id="${hoa.hoaID}"]`);
+
+                if (existingEntry) {
+                    const span = existingEntry.querySelector('span');
+                    if (span) span.textContent = hoa.name;
+                } else {
+                    const hoaList = document.querySelector('.hoa-list');
+                    const newEntry = document.createElement('div');
+                    newEntry.className = 'hoa-item';
+                    newEntry.setAttribute('data-id', hoa.hoaID);
+                    newEntry.innerHTML = `
+                        <span>${hoa.name}</span>
+                        <div>
+                            <button onclick="editHOA(${hoa.hoaID})" style="margin-right: 8px;">Edit</button>
+                            <button onclick="deleteHOA(${hoa.hoaID})">Delete</button>
+                        </div>
+                    `;
+                    hoaList.insertBefore(newEntry, hoaList.firstChild);
+                }
+
+                const index = currentEntries.findIndex(e => e.hoaID == hoa.hoaID);
+                if (index !== -1) currentEntries[index] = { hoaID: Number(hoa.hoaID), name: hoa.name, description: hoa.description };
+                else currentEntries.unshift({ hoaID: hoa.hoaID, name: hoa.name, description: hoa.description });
+
+                cancelHOA();
+            })
+            .catch(err => {
+                console.error(err);
+                showError('Failed to save HOA entry');
+            });
+        }
+
+        function saveAnnouncement() {
+            if (!validateAnnouncementForm()) {
+                return;
+            }
+
+            const message = document.getElementById('announcementMessage').value;
+            const color = document.getElementById('announcementColor').value;
+            
+            const url = currentEditId ? '/api/editAnnouncement' : '/api/addAnnouncement';
+            const data = {
+                message: message,
+                color: color
+            };
+            
+            if (currentEditId) {
+                data.announcementID = currentEditId;
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (currentEditId) {
+                        const existingAnnouncement = document.querySelector(`[data-id="${currentEditId}"]`);
+                        if (existingAnnouncement) {
+                            existingAnnouncement.querySelector('.message').innerHTML = message;
+                            existingAnnouncement.querySelector('.color-preview').style.backgroundColor = color;
+                        }
+                        const announcementIndex = currentAnnouncements.findIndex(e => e.announcementID === currentEditId);
+                        if (announcementIndex !== -1) {
+                            currentAnnouncements[announcementIndex] = {
+                                ...currentAnnouncements[announcementIndex],
+                                message: message,
+                                color: color
+                            };
+                        }
+                    } else {
+                        const announcementsList = document.querySelector('.announcements-list');
+                        const newAnnouncement = document.createElement('div');
+                        newAnnouncement.className = 'announcement-item';
+                        newAnnouncement.setAttribute('data-id', data.announcementID);
+                        newAnnouncement.innerHTML = `
+                            <div class="color-preview" style="background-color: ${color}"></div>
+                            <div class="message">${message}</div>
+                            <div class="actions">
+                                <button onclick="editAnnouncement(${data.announcementID})">Edit</button>
+                                <button onclick="deleteAnnouncement(${data.announcementID})">Delete</button>
+                            </div>
+                        `;
+                        announcementsList.insertBefore(newAnnouncement, announcementsList.firstChild);
+                        
+                        currentAnnouncements.unshift({
+                            announcementID: data.announcementID,
+                            message: message,
+                            color: color
+                        });
+                    }
+                    cancelAnnouncement();
+                } else {
+                    showError(data.error || 'Failed to save announcement');
+                }
+            })
+            .catch(error => {
+                showError('Failed to save announcement');
+                console.error('Error:', error);
+            });
+        }
+
+        function deleteAnnouncement(id) {
+            fetch('/api/deleteAnnouncement', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ announcementID: id }),
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const announcement = document.querySelector(`[data-id="${id}"]`);
+                    if (announcement) {
+                        announcement.remove();
+                    }
+                    currentAnnouncements = currentAnnouncements.filter(e => e.announcementID !== id);
+                } else {
+                    showError(data.error || 'Failed to delete announcement');
+                }
+            })
+            .catch(error => {
+                showError('Failed to delete announcement');
+                console.error('Error:', error);
+            });
+        }
+
+        function deleteHOA(id) {
+            const formData = new FormData();
+            formData.append('hoaID', id);
+
+            fetch('/api/deleteHOA', {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const entry = document.querySelector(`[data-id="${id}"]`);
+                    if (entry) {
+                        entry.remove();
+                    }
+                    currentEntries = currentEntries.filter(e => e.hoaID !== id);
+                } else {
+                    showError(data.error || 'Failed to delete HOA entry');
+                }
+            })
+            .catch(error => {
+                showError('Failed to delete HOA entry');
+                console.error('Error:', error);
+            });
+        }
+
+        function loadHOAEntries() {
+            const hoaList = document.querySelector('.hoa-list');
+            const entries = currentEntries;
+
+            hoaList.innerHTML = entries.map(entry => `
+                <div class="hoa-item" data-id="${entry.hoaID}">
+                    <span>${entry.name}</span>
+                    <div>
+                        <button onclick="editHOA(${entry.hoaID})" style="margin-right: 8px;">Edit</button>
+                        <button onclick="deleteHOA(${entry.hoaID})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadAnnouncements() {
+            const announcementsList = document.querySelector('.announcements-list');
+            const announcements = currentAnnouncements;
+
+            announcementsList.innerHTML = announcements.map(announcement => `
+                <div class="announcement-item" data-id="${announcement.announcementID}">
+                    <div class="color-preview" style="background-color: ${announcement.color}"></div>
+                    <div class="message">${announcement.message}</div>
+                    <div class="actions">
+                        <button onclick="editAnnouncement(${announcement.announcementID})">Edit</button>
+                        <button onclick="deleteAnnouncement(${announcement.announcementID})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadHOAEntries();
+            loadAnnouncements();
+        });
+    </script>
+</body>
+</html>
+{% endblock %}

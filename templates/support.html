@@ -1,0 +1,125 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="icon" href="data:,">
+    <title>Support | Vilebin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<style>
+    .main-container {
+        max-width: 1200px;
+        margin: 20px auto;
+        padding: 0 20px;
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            margin: 10px auto;
+            padding: 0 5px;
+            max-width: 100%;
+        }
+    }
+
+    .contact-section {
+        margin-bottom: 30px;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+        color: #fff;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+    }
+
+    .contact-item {
+        margin-bottom: 10px;
+        color: #fff;
+        font-size: .98rem;
+        line-height: 1.5;
+    }
+
+    .contact-item ul {
+        padding-left: 0;
+        margin-left: 0;
+        list-style-position: inside;
+    }
+
+    .contact-link {
+        color: red;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .contact-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<body>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <main>
+        <div class="main-container">
+            <div class="contact-section">
+                <h2 class="section-title">Platform Resources</h2>
+                <div class="contact-item">
+                    <ul>
+                        <li><a href="/tos" class="contact-link">Terms of Service</a></li>
+                        <li><a href="https://t.me/+wx6FDhUR_ntiZDVi" target="_blank" class="contact-link">Telegram Channel</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="contact-section">
+                <h2 class="section-title">Mirrors</h2>
+                <div class="contact-item">
+                    <ul>
+                        <li><a href="https://vilebin.net/home" target="_blank" class="contact-link">vilebin.net</a></li>
+                        <li><a href="https://vilebin.cx/home" target="_blank" class="contact-link">vilebin.cx</a></li>
+                        <!-- <li><a href="https://vilebin.cc/home" target="_blank" class="contact-link">vilebin.cc</a></li> -->
+                    </ul>
+                </div>
+            </div>
+
+            <div class="contact-section">
+                <h2 class="section-title">Removal Request Guidelines</h2>
+				<div class="contact-item">
+				  Vilebin will review content removal requests that claim a violation of our Terms of Service ("TOS").<br />For non-law enforcement agency requests, please contact us via Telegram at <a href="https://t.me/vilebinceo" class="contact-link" target="_blank">t.me/joker</a>.
+				</div>
+            </div>
+
+            <div class="contact-section">
+                <h2 class="section-title">Law Enforcement Request Guidelines</h2>
+                <div class="contact-item">
+                    Vilebin will respond to all law enforcement requests from authorized officials. These Law Enforcement
+                    Request Guidelines outline how authorized law enforcement officials can engage with and contact us
+                    to request information or content removal in accordance with applicable laws and policies. To
+                    facilitate processing, we require that all requests be addressed directly to Vilebin. Please include
+                    proper Mutual Legal Assistance Treaty documents if cross-border law enforcement is involved.
+                </div>
+
+                <div class="contact-item">
+                    Vilebin does not retain any subscriber information that is not directly provided to us, such as IP
+                    addresses. We will only cooperate with data requests if accompanied by a valid court order, and will
+                    actively fight any attempt to subpoena or otherwise acquire any user information. We will
+                    voluntarily cooperate with law enforcement requests from all jurisdictions for content removal
+                    requests when the content violates our TOS. All law enforcement requests and abuse should be submitted via
+                    email to <a href="mailto:legal@vilebin.cx" class="contact-link">legal@vilebin.cx</a> for
+                    processing.
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+</html>
+{% endblock %}

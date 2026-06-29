@@ -1,0 +1,210 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!doctype html>
+<html lang="en">
+<head>
+    <style>
+        body {
+            background-color: #000;
+        }
+        
+        .main-container {
+            margin-left: 260px;
+            padding: 20px 20px 0 0;
+            color: #fff;
+            font-size: 13px;
+        }
+        @media (max-width: 768px) {
+            .main-container {
+                margin-left: 0;
+                padding-top: 75px;
+            }
+        }
+        
+        .search-section {
+            margin-bottom: 15px;
+        }
+        
+        .search-section input[type="text"],
+        .search-section input[type="number"],
+        .search-section select,
+        .search-button {
+            background-color: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 1px 4px;
+            margin: 2px 0;
+            height: 20px;
+            font-size: 13px;
+            vertical-align: middle;
+            width: 200px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .search-section input[type="text"]:focus,
+        .search-section input[type="number"]:focus,
+        .search-section select:focus {
+            outline: none;
+            border-color: #333;
+        }
+
+        .search-section input[type="text"]:focus,
+        .search-section input[type="number"]:focus,
+        .search-section select:focus {
+            color: #fff !important;
+        }
+
+        .search-section input[type="checkbox"] {
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .search-section label {
+            display: inline-block;
+            width: 75px;
+            color: #fff;
+            font-weight: bold;
+            vertical-align: middle;
+        }
+
+        .checkbox-label {
+            color: #fff;
+            font-size: 13px;
+            margin-left: 0;
+            vertical-align: middle;
+        }
+
+        .search-section select {
+            height: 22px;
+        }
+
+        .search-button {
+            cursor: pointer;
+            margin-left: 79px;
+            width: 200px;
+            font-weight: bold;
+        }
+
+        .search-row {
+            margin: 3px 0;
+            line-height: 22px;
+        }
+
+        *:focus {
+            outline: none !important;
+        }
+
+        .user-table {
+            color: #fff;
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+
+        .user-table th, .user-table td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .user-table th {
+            background-color: #1a1a1a;
+        }
+    </style>
+</head>
+<body>
+{% include 'admin/navbar.html' %}
+
+<main class="main-container">
+    <form method="POST" class="search-section">
+        <div class="search-row">
+            <label>User ID:</label>
+            <input type="text" name="user_id" placeholder="User ID" value="{{ search.user_id or '' }}">
+        </div>
+        <div class="search-row">
+            <label>Username:</label>
+            <input type="text" name="username" placeholder="Username" value="{{ search.username or '' }}">
+        </div>
+        <div class="search-row">
+            <label>Email:</label>
+            <input type="text" name="email" placeholder="Email" value="{{ search.email or '' }}">
+        </div>
+        <div class="search-row">
+            <label>Rank:</label>
+            <select name="rank">
+                <option value=""></option>
+                <option value="admin" {{ 'selected' if search.rank == 'admin' }}>Admin</option>
+                <option value="manager" {{ 'selected' if search.rank == 'manager' }}>Manager</option>
+                <option value="mod" {{ 'selected' if search.rank == 'mod' }}>Mod</option>
+                <option value="council" {{ 'selected' if search.rank == 'council' }}>Council</option>
+                <option value="founder" {{ 'selected' if search.rank == 'founder' }}>Founder</option>
+                <option value="clique" {{ 'selected' if search.rank == 'clique' }}>Clique</option>
+                <option value="rich" {{ 'selected' if search.rank == 'rich' }}>Rich</option>
+                <option value="criminal" {{ 'selected' if search.rank == 'criminal' }}>Criminal</option>
+                <option value="vip" {{ 'selected' if search.rank == 'vip' }}>VIP</option>
+                <option value="default" {{ 'selected' if search.rank == 'default' }}>Default</option>
+            </select>
+        </div>
+        <button type="submit" class="search-button">SEARCH</button>
+    </form>
+  {% if users is defined %}
+      {% if users | length > 0 %}
+          <table class="user-table">
+              <thead>
+                  <tr>
+                      <th>UID</th>
+                      <th>Username</th>
+                      <th>Status</th>
+                      <th>Email</th>
+                      <th>Rank</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for user in users %}
+                  <tr onclick="window.location='/admin/users/{{ user.username }}'" style="cursor:pointer;">
+                      <td>{{ user.id }}</td>
+                      <td>{{ user.username }}</td>
+                      <td>
+                          {% if user.ban %}
+                              <span style="color: #ff0000; font-weight: bold;">Banned</span>
+                          {% elif user.active %}
+                              <span style="color: green; font-weight: bold;">Active</span>
+                          {% else %}
+                              <span style="color: #df3333; font-weight: bold;">Inactive</span>
+                          {% endif %}
+                      </td>
+                      <td>
+                          {% if user.email == '[Hidden]' %}
+                              <span style="color: #ff0000;">[Hidden]</span>
+                          {% elif user.email %}
+                              {{ user.email }}
+                          {% else %}
+                              <span style="color: #ff0000;">[Not Found]</span>
+                          {% endif %}
+                      </td>
+                      <td>
+                        {% set s = styles.get(user.status, styles['user']) %}
+
+                        <span style="{{ s.rankStyle }}">
+                            {% if user.status == 'user' %}
+                                Default
+                            {% else %}
+                                {{ user.status | capitalize }}
+                            {% endif %}
+                        </span>
+                      </td>
+                  </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      {% else %}
+          <p class="no-results">No users found.</p>
+      {% endif %}
+  {% endif %}
+</main>
+
+</body>
+</html>
+{% endblock %}

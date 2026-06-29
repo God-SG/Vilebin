@@ -1,0 +1,603 @@
+{% extends "navbar.html" %}
+
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin | Blacklist</title>
+
+<style>
+    :root{
+        --bg:#050505;
+        --inside:#0c0c0c;
+        --outline:#242424;
+        --grid:#202020;
+        --grid2:#1a1a1a;
+        --txt:#e9e9e9;
+        --muted:#bfbfbf;
+        --muted2:#a2a2a2;
+        --dangerText:#ff6b6b;
+
+        --btn-red:#4c0a14;
+        --btn-green:#104010;
+
+        --usernameDefault:#6fb7ff;
+    }
+
+    .main-container {
+        margin-left: 370px;
+        padding: 20px 20px 0 15px;
+        color: #fff;
+        font-size: 13px;
+    }
+    .main-container *{box-sizing:border-box}
+    
+    html,body{height:100%}
+    body{
+        margin:0;
+        background:var(--bg);
+        color:var(--txt);
+        font:13px Tahoma, Arial, sans-serif;
+    }
+
+    .page{display:flex;justify-content:center;padding:14px 0}
+    .wrap{width:1400px;max-width:96vw}
+
+    .panel{
+        border:1px solid var(--outline);
+        background:var(--inside);
+        margin-bottom:14px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -1px 0 rgba(0,0,0,0.65);
+    }
+    .panel-title{
+        padding:7px 10px;
+        font-weight:700;
+        color:#dcdcdc;
+        background:var(--inside);
+        border-bottom:1px solid var(--grid);
+        text-shadow:0 1px 0 #000;
+    }
+
+    .btn{
+        height:28px;
+        padding:0 12px;
+        line-height:26px;
+        font-size:11px;
+        font-weight:700;
+        font-family:Tahoma,Arial,sans-serif;
+        border:1px solid var(--outline);
+        background:#0b0b0b;
+        color:#e6e6e6;
+        text-shadow:0 1px 0 #000;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.05), inset 0 -1px 0 rgba(0,0,0,.6);
+        cursor:pointer;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:3px;
+        white-space:nowrap;
+    }
+    .btn-red{ background:var(--btn-red); color:#ffcccc; }
+    .btn-green{ background:var(--btn-green); color:#ccffcc; }
+    .btn:active{ box-shadow: inset 0 2px 4px rgba(0,0,0,.8); transform:translateY(1px); }
+
+    table{width:100%;border-collapse:collapse;table-layout:fixed}
+    thead th{
+        background:#0b0b0b;
+        padding:7px 10px;
+        border-bottom:1px solid var(--grid);
+        text-align:center;
+        color:var(--muted);
+        font-weight:700;
+    }
+    tbody td{
+        padding:8px 10px;
+        border-bottom:1px solid var(--grid2);
+        font-weight:700;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        text-align:center;
+    }
+    tbody tr:nth-child(odd) td{background:#0a0a0a}
+    tbody tr:nth-child(even) td{background:#080808}
+
+    .h1{
+        font-weight:700;
+        font-size:18px;
+        margin:0 0 10px 0;
+        text-shadow:0 1px 0 #000;
+    }
+
+    .form-grid{
+        display:grid;
+        grid-template-columns: 1fr 380px;
+        gap:14px;
+        padding:12px;
+    }
+    .label{display:block;color:var(--muted2);font-weight:700;margin-bottom:6px}
+    .field, .textarea{
+        width:100%;
+        background:#0b0b0b;
+        border:1px solid var(--outline);
+        color:var(--txt);
+        padding:10px;
+        font:13px Tahoma,Arial,sans-serif;
+        border-radius:3px;
+        outline:none;
+        box-shadow:inset 0 1px 3px rgba(0,0,0,0.7);
+    }
+    .field{height:32px;padding:0 10px}
+    .textarea{height:84px;resize:vertical}
+    .help{color:#9a9a9a;font-size:11px;margin-top:6px}
+
+    .empty-row{
+        text-align:center;
+        color:#777;
+        font-weight:700;
+        padding:12px 10px !important;
+        background:#080808 !important;
+    }
+
+    .blurred {
+        filter: blur(6px);
+        cursor: pointer;
+        transition: filter 0.3s;
+        font-weight: bold;
+    }
+    .blurred.revealed {
+        filter: none;
+    }
+
+    .panel-title-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 10px;
+        background: var(--inside);
+        border-bottom: 1px solid var(--grid);
+    }
+    .panel-title-bar .panel-title {
+        padding: 0;
+        border-bottom: none;
+        background: none;
+    }
+
+    .search-wrap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .search-input {
+        height: 26px;
+        padding: 0 8px;
+        background: #0b0b0b;
+        border: 1px solid var(--outline);
+        color: var(--txt);
+        font: 11px Tahoma, Arial, sans-serif;
+        border-radius: 3px;
+        outline: none;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.7);
+        width: 200px;
+        transition: border-color 0.2s;
+    }
+    .search-input:focus {
+        border-color: #3a3a3a;
+    }
+    .search-input::placeholder {
+        color: #555;
+    }
+    .search-clear {
+        height: 26px;
+        padding: 0 8px;
+        font-size: 10px;
+        font-weight: 700;
+        font-family: Tahoma, Arial, sans-serif;
+        border: 1px solid var(--outline);
+        background: #0b0b0b;
+        color: #888;
+        border-radius: 3px;
+        cursor: pointer;
+        display: none;
+    }
+    .search-clear:hover { color: #bbb; }
+    .search-clear.visible { display: inline-block; }
+
+    .pagination-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border-top: 1px solid var(--grid);
+        background: var(--inside);
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .pagination-info {
+        color: var(--muted2);
+        font-size: 11px;
+        font-weight: 700;
+    }
+    .pagination-info span {
+        color: var(--muted);
+    }
+    .pagination-pages {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .pg-btn {
+        height: 24px;
+        min-width: 24px;
+        padding: 0 6px;
+        font-size: 11px;
+        font-weight: 700;
+        font-family: Tahoma, Arial, sans-serif;
+        border: 1px solid var(--outline);
+        background: #0b0b0b;
+        color: #aaa;
+        cursor: pointer;
+        border-radius: 3px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s, color 0.15s;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    }
+    .pg-btn:hover:not(:disabled):not(.pg-active) {
+        background: #141414;
+        color: #ddd;
+    }
+    .pg-btn.pg-active {
+        background: #1a1a1a;
+        border-color: #3a3a3a;
+        color: #fff;
+        cursor: default;
+    }
+    .pg-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+    .pg-ellipsis {
+        color: #555;
+        font-size: 11px;
+        padding: 0 3px;
+        font-weight: 700;
+    }
+    .no-results-row td {
+        text-align: center;
+        color: #666;
+        font-weight: 700;
+        padding: 12px 10px !important;
+        background: #080808 !important;
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            margin-left: 0;
+            padding: 75px 10px 0 10px;
+        }
+
+        .wrap {
+            max-width: 100%;
+        }
+
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .panel-title-bar {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .search-wrap {
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            flex: 1;
+        }
+
+        table { table-layout: auto; }
+
+        thead th:nth-child(1),
+        tbody td:nth-child(1) { width: auto; }
+
+        thead th:nth-child(4),
+        tbody td:nth-child(4),
+        thead th:nth-child(5),
+        tbody td:nth-child(5) {
+            display: none;
+        }
+
+        thead th:nth-child(2),
+        tbody td:nth-child(2) { max-width: 120px; }
+
+        thead th:nth-child(3),
+        tbody td:nth-child(3) { max-width: 90px; }
+
+        tbody td {
+            padding: 7px 6px;
+            font-size: 11px;
+        }
+
+        thead th {
+            padding: 7px 6px;
+            font-size: 11px;
+        }
+
+        .btn {
+            height: 32px;
+            padding: 0 10px;
+            font-size: 11px;
+        }
+
+        .pagination-bar {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .pg-btn {
+            height: 30px;
+            min-width: 30px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .h1 { font-size: 15px; }
+
+        thead th:nth-child(3),
+        tbody td:nth-child(3) { display: none; }
+
+        .panel-title { font-size: 12px; }
+    }
+</style>
+</head>
+
+<body>
+    {% include 'admin/navbar.html' %}
+
+    <main class="main-container">
+        <div class="wrap">
+            <div class="h1">Blacklist</div>
+                <div class="panel">
+                    <div class="panel-title">Add to blacklist</div>
+
+                    <div class="form-grid">
+                    <div>
+                        <label class="label" for="blWords">Blacklisted words (1 per line)</label>
+                        <textarea id="blWords" class="textarea" placeholder="word1&#10;word2&#10;word3"></textarea>
+                        <div class="help">Each line becomes a separate blacklist entry (same contact info).</div>
+                    </div>
+
+                    <div>
+                        <label class="label" for="blContact">Contact info</label>
+                        <input id="blContact" class="field" type="text" placeholder="email / telegram / notes" />
+                        <div class="help">Optional. Shown in the table.</div>
+
+                        <div style="margin-top:14px;display:flex;gap:10px;justify-content:flex-start;flex-wrap:wrap;">
+                        <button id="btnAdd" class="btn btn-green" type="button">ADD TO BLACKLIST</button>
+                        <button id="btnClearForm" class="btn btn-red" type="button">CLEAR</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title-bar">
+                        <div class="panel-title">Blacklist Pastes</div>
+                        <div class="search-wrap">
+                            <input type="text" id="searchInput" class="search-input" placeholder="Search word, contact, user..." />
+                            <button id="searchClear" class="search-clear" type="button">✕</button>
+                        </div>
+                    </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                <th style="width:6%;">ID</th>
+                                <th style="width:48%;">Blacklist Words</th>
+                                <th style="width:14%;">Contact Info</th>
+                                <th style="width:13%;">Created by</th>
+                                <th style="width:19%;">Added</th>
+                                <th style="width:10%;">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                {% if not blacklist_entries %}
+                                    <tr><td colspan="6" class="empty-row">No blacklist entries.</td></tr>
+                                {% else %}
+                                    {% for entry in blacklist_entries %}
+                                    <tr
+                                        data-word="{{ entry.word if entry.word else '' }}"
+                                        data-contact="{{ entry.contact_info if entry.contact_info else '' }}"
+                                        data-creator="{{ entry.created_by if entry.created_by else '' }}"
+                                        data-date="{{ entry.created_at if entry.created_at else '' }}"
+                                    >
+                                        <td>{{ entry.id }}</td>
+                                        <td><span class="blurred" onclick="this.classList.toggle('revealed')">{{ entry.word }}</span></td>
+                                        <td><span {% if entry.contact_info %} class="blurred" onclick="this.classList.toggle('revealed')"{% endif %}>{{ entry.contact_info or "N/A" }}</span></td>
+                                        <td>
+                                            {% set s = styles.get(entry.created_by_status, styles['user']) %}
+                                            {% if entry.created_by_status == 'anonymous' %}
+                                                {{ entry.created_by }}
+                                            {% else %}
+                                                <a href="/user/{{ entry.created_by }}" target="_blank" style="{{ s.rankStyle }} text-decoration: none;" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">
+                                                    <span style="color: {{ entry.created_by_color }};">{{ entry.created_by }}</span>
+                                                    {% if s.suffix %} {{ s.suffix }}{% endif %}
+                                                </a>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ entry.created_at }}</td>
+                                        <td>
+                                            <button class="btn btn-red" type="button"
+                                                onclick="fetch('/api/deleteBlacklist?id={{ entry.id }}').then(r=>r.json()).then(d=>{ if(d.success){ this.closest('tr').remove(); BL.rebuild(); } })">
+                                                DEL
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+
+                    <div class="pagination-bar" id="paginationBar">
+                        <div class="pagination-info" id="paginationInfo"></div>
+                        <div class="pagination-pages" id="paginationPages"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+<script>
+    const BL = (() => {
+        const PER_PAGE = 5;
+        let currentPage = 1;
+        let filtered = [];
+
+        const tbody = document.getElementById('tableBody');
+        const searchInput = document.getElementById('searchInput');
+        const searchClear = document.getElementById('searchClear');
+        const infoEl = document.getElementById('paginationInfo');
+        const pagesEl = document.getElementById('paginationPages');
+
+        function allRows() {
+            return Array.from(tbody.querySelectorAll('tr[data-word]'));
+        }
+
+        function applySearch(q) {
+            const rows = allRows();
+            if (!q) return rows;
+            return rows.filter(r =>
+                (r.dataset.word || '').toLowerCase().includes(q) ||
+                (r.dataset.contact || '').toLowerCase().includes(q) ||
+                (r.dataset.creator || '').toLowerCase().includes(q) ||
+                (r.dataset.date || '').toLowerCase().includes(q)
+            );
+        }
+
+        function render() {
+            const q = searchInput.value.trim().toLowerCase();
+            filtered = applySearch(q);
+
+            const total = filtered.length;
+            const totalPages = Math.max(1, Math.ceil(total / PER_PAGE));
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * PER_PAGE;
+            const end = start + PER_PAGE;
+            const pageRows = filtered.slice(start, end);
+
+            allRows().forEach(r => { r.style.display = 'none'; });
+
+            let noResult = tbody.querySelector('.no-results-row');
+            if (noResult) noResult.remove();
+
+            if (total === 0) {
+                const tr = document.createElement('tr');
+                tr.className = 'no-results-row';
+                tr.innerHTML = '<td colspan="6">No entries match your search.</td>';
+                tbody.appendChild(tr);
+            } else {
+                pageRows.forEach(r => { r.style.display = ''; });
+            }
+
+            renderInfo(start, end, total);
+            renderPages(totalPages);
+        }
+
+        function renderInfo(start, end, total) {
+            if (total === 0) { infoEl.innerHTML = ''; return; }
+            infoEl.innerHTML = 'Showing <span>' + (start + 1) + '–' + Math.min(end, total) + '</span> of <span>' + total + '</span>';
+        }
+
+        function renderPages(totalPages) {
+            pagesEl.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            function makeBtn(label, page, isActive, isDisabled) {
+                const b = document.createElement('button');
+                b.className = 'pg-btn' + (isActive ? ' pg-active' : '');
+                b.textContent = label;
+                b.disabled = isDisabled;
+                if (!isActive && !isDisabled) {
+                    b.addEventListener('click', function() { currentPage = page; render(); });
+                }
+                return b;
+            }
+
+            function makeEllipsis() {
+                const s = document.createElement('span');
+                s.className = 'pg-ellipsis';
+                s.textContent = '…';
+                return s;
+            }
+
+            pagesEl.appendChild(makeBtn('‹', currentPage - 1, false, currentPage === 1));
+
+            const range = buildPageRange(currentPage, totalPages);
+            let prev = null;
+            range.forEach(function(p) {
+                if (prev !== null && p - prev > 1) pagesEl.appendChild(makeEllipsis());
+                pagesEl.appendChild(makeBtn(p, p, p === currentPage, false));
+                prev = p;
+            });
+
+            pagesEl.appendChild(makeBtn('›', currentPage + 1, false, currentPage === totalPages));
+        }
+
+        function buildPageRange(cur, total) {
+            const delta = 2;
+            const range = new Set([1, total]);
+            for (let i = Math.max(2, cur - delta); i <= Math.min(total - 1, cur + delta); i++) range.add(i);
+            return Array.from(range).sort(function(a, b) { return a - b; });
+        }
+
+        function rebuild() {
+            currentPage = 1;
+            render();
+        }
+
+        searchInput.addEventListener('input', function() {
+            currentPage = 1;
+            searchClear.classList.toggle('visible', searchInput.value.length > 0);
+            render();
+        });
+
+        searchClear.addEventListener('click', function() {
+            searchInput.value = '';
+            searchClear.classList.remove('visible');
+            currentPage = 1;
+            render();
+        });
+
+        render();
+        return { rebuild: rebuild };
+    })();
+
+    document.getElementById("btnAdd").onclick = function() {
+        const words = document.getElementById("blWords").value.trim();
+        const contact = document.getElementById("blContact").value.trim();
+        if (!words) return;
+        const params = new URLSearchParams({ words: words, contact_info: contact });
+        fetch('/api/addBlacklist?' + params.toString())
+        .then(function(r) { return r.json(); })
+        .then(function(d) { if (d.success) location.reload(); });
+    };
+
+    document.getElementById("btnClearForm").onclick = function() {
+        document.getElementById("blWords").value = "";
+        document.getElementById("blContact").value = "";
+    };
+</script>
+</body>
+</html>
+{% endblock %}

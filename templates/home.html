@@ -1,0 +1,904 @@
+{% extends "navbar.html" %}
+{% block top %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Home | Vilebin</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    
+    <meta name="title" content="Vilebin">
+    <meta name="description" content="Vilebin is a document sharing and publishing website for text-based information such as dox, code-snippets and other stuff." />
+
+    <meta property="og:title" content="Vilebin" />
+    <meta property="og:description" content="Vilebin is a document sharing and publishing website for text-based information such as dox, code-snippets and other stuff." />
+    <meta property="og:site_name" content="Vilebin" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="/home" />
+    <meta property="twitter:title" content="Vilebin" />
+    <meta property="twitter:description" content="Vilebin is a document sharing and publishing website for text-based information such as dox, code-snippets and other stuff." />
+    <meta name="keywords" content="Vilebin, vilebin, Ghostbin, ghostbin, Darkbin, darkbin, даркбин, вилебин, вил, гостбин, doxbin, доксбин, dox, doxed, vile, ghost, гост">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<style>
+    .search-container {
+        text-align: center;
+        margin: 10px 0 0 0;
+    }
+    .search-label {
+        color: #888888;
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+    .search-form {
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+    }
+    .search-box {
+        background: #282828;
+        border: none;
+        outline: none;
+        color: white;
+        padding: 5px 10px;
+        width: 240px;
+        height: 32px;
+        box-sizing: border-box;
+    }
+    .search-box::placeholder {
+        color: #878787;
+    }
+    .search-box:focus {
+        outline: none;
+    }
+    .search-button {
+        background: #282828;
+        color: white;
+        border: none;
+        padding: 5px 15px;
+        cursor: pointer;
+        height: 32px;
+        box-sizing: border-box;
+        font-size: 13px;
+    }
+    .pagination {
+        text-align: center;
+        margin: 10px 0;
+        color: white;
+        display: inline-flex;
+        justify-content: center;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 13px;
+    }
+    .pagination a {
+        color: #FFFFFF;
+        text-decoration: none;
+        padding: 3px 8px;
+        min-width: 15px;
+        display: inline-block;
+        transition: all 0.2s ease;
+        border: 1px solid #878787;
+        margin-left: -1px;
+    }
+    .pagination a:first-child {
+        border-radius: 3px 0 0 3px;
+        margin-left: 0;
+    }
+    .pagination a:last-child {
+        border-radius: 0 3px 3px 0;
+    }
+    .pagination a:hover {
+        color: white;
+    }
+    .pagination a.active {
+        color: white;
+        background: #181818;
+        border: 1px solid #878787;
+        position: relative;
+    }
+    .pinned-pastes {
+        width: 75%;
+        max-width: 1100px;
+        margin: 10px auto 25px;
+        color: white;
+    }
+    .pinned-pastes h2 {
+        color: white;
+        margin: 10px 0;
+        padding: 0;
+        font-weight: normal;
+        font-size: 16px;
+    }
+    .pinned-pastes table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #080808;
+        font-size: 14px;
+    }
+    .pinned-pastes th {
+        padding: 8px;
+        text-align: left;
+        background: #181818;
+        font-weight: bold;
+        border: none;
+        border-bottom: 1px solid #333;
+    }
+    .pinned-pastes th:not(:first-child) {
+        text-align: center;
+    }
+    .pinned-pastes td {
+        padding: 9px;
+        border: none;
+        border-bottom: 1px solid #333;
+    }
+    .pinned-pastes td:not(:first-child) {
+        text-align: center;
+    }
+    .pinned-pastes tr {
+        background: #080808;
+    }
+    .pinned-pastes tr[data-highlight] {
+        background: attr(data-highlight);
+    }
+    .pinned-pastes a {
+        color: inherit;
+        text-decoration: none;
+    }
+    .pinned-pastes a:hover {
+        text-decoration: underline;
+    }
+    .all-pastes {
+        width: 75%;
+        max-width: 1100px;
+        margin: 0 auto 20px;
+        color: white;
+    }
+    .all-pastes table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    .all-pastes th {
+        padding: 8px;
+        text-align: left;
+        background: #181818;
+        font-weight: bold;
+        border: none;
+        border-bottom: 1px solid #333;
+    }
+    .all-pastes th:not(:first-child) {
+        text-align: center;
+    }
+    .all-pastes td {
+        padding: 9px;
+        border: none;
+        border-bottom: 1px solid #333;
+    }
+    .all-pastes td:not(:first-child) {
+        text-align: center;
+    }
+    .all-pastes tr {
+        background: #181818;
+    }
+    .all-pastes tr:nth-child(even) {
+        background: #080808;
+    }
+    .all-pastes a {
+        color: inherit;
+        text-decoration: none;
+    }
+    .all-pastes a:hover {
+        text-decoration: underline;
+    }
+    .pinned-pastes td:first-child,
+    .pinned-pastes th:first-child,
+    .all-pastes td:first-child,
+    .all-pastes th:first-child {
+        width: 35%;
+    }
+    .pinned-pastes td:nth-child(2),
+    .pinned-pastes th:nth-child(2),
+    .all-pastes td:nth-child(2),
+    .all-pastes th:nth-child(2) {
+        width: 10%;
+    }
+    .pinned-pastes td:nth-child(3),
+    .pinned-pastes th:nth-child(3),
+    .all-pastes td:nth-child(3),
+    .all-pastes th:nth-child(3) {
+        width: 10%;
+    }
+    .pinned-pastes td:nth-child(4),
+    .pinned-pastes th:nth-child(4),
+    .all-pastes td:nth-child(4),
+    .all-pastes th:nth-child(4) {
+        width: 20%;
+    }
+    .pinned-pastes td:nth-child(5),
+    .pinned-pastes th:nth-child(5),
+    .all-pastes td:nth-child(5),
+    .all-pastes th:nth-child(5) {
+        width: 15%;
+    }
+    .pinned-pastes td:nth-child(6),
+    .pinned-pastes th:nth-child(6),
+    .all-pastes td:nth-child(6),
+    .all-pastes th:nth-child(6) {
+        width: 10%;
+        color: #ff0000;
+    }
+    .showing-text {
+        color: #888888;
+        text-align: center;
+        font-size: 14px;
+        margin: 10px 0;
+    }
+    .showing-text span {
+        color: #666;
+    }
+    .logo-container {
+        text-align: center;
+        margin: 10px 0 0 0;
+    }
+    .logo-container img {
+        max-width: 300px;
+        height: auto;
+    }
+    @media screen and (max-width: 480px) {
+        .logo-container img {
+            max-width: 200px;
+        }
+    }
+    .announcements {
+        text-align: center;
+        margin: 10px 0;
+    }
+    .announcement {
+        margin: 10px 0;
+        font-size: 17px;
+        font-weight: bold;
+    }
+    @media screen and (max-width: 1024px) {
+        .pinned-pastes {
+            width: 90%;
+        }
+        .all-pastes {
+            width: 90%;
+        }
+    }
+    @media screen and (max-width: 768px) {
+        .pinned-pastes {
+            width: 95%;
+        }
+        .pinned-pastes table {
+            font-size: 13px;
+        }
+        .all-pastes {
+            width: 95%;
+        }
+        .all-pastes table {
+            font-size: 13px;
+        }
+        .pinned-pastes td:nth-child(2),
+        .pinned-pastes th:nth-child(2),
+        .all-pastes td:nth-child(2),
+        .all-pastes th:nth-child(2),
+        .pinned-pastes td:nth-child(3),
+        .pinned-pastes th:nth-child(3),
+        .all-pastes td:nth-child(3),
+        .all-pastes th:nth-child(3),
+        .pinned-pastes td:nth-child(6),
+        .pinned-pastes th:nth-child(6),
+        .all-pastes td:nth-child(6),
+        .all-pastes th:nth-child(6) {
+            display: none;
+        }
+        .pinned-pastes td:first-child,
+        .pinned-pastes th:first-child,
+        .all-pastes td:first-child,
+        .all-pastes th:first-child {
+            width: 45%;
+        }
+        .pinned-pastes td:nth-child(4),
+        .pinned-pastes th:nth-child(4),
+        .all-pastes td:nth-child(4),
+        .all-pastes th:nth-child(4) {
+            width: 30%;
+        }
+        .pinned-pastes td:nth-child(5),
+        .pinned-pastes th:nth-child(5),
+        .all-pastes td:nth-child(5),
+        .all-pastes th:nth-child(5) {
+            width: 25%;
+        }
+    }
+    @media screen and (max-width: 480px) {
+        .pinned-pastes {
+            width: 100%;
+            margin: 20px 5px;
+        }
+        .pinned-pastes table {
+            font-size: 12px;
+            table-layout: fixed;
+        }
+        .all-pastes {
+            width: 100%;
+            margin: 20px 5px;
+        }
+        .all-pastes table {
+            font-size: 12px;
+            table-layout: fixed;
+        }
+        .search-box {
+            width: 180px;
+        }
+        .pinned-pastes td,
+        .pinned-pastes th,
+        .all-pastes td,
+        .all-pastes th {
+            padding: 6px 4px;
+        }
+        .pinned-pastes td:first-child,
+        .pinned-pastes th:first-child,
+        .all-pastes td:first-child,
+        .all-pastes th:first-child {
+            width: 45%;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pinned-pastes td:first-child a,
+        .all-pastes td:first-child a {
+            display: block;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .pinned-pastes td:nth-child(4),
+        .pinned-pastes th:nth-child(4),
+        .all-pastes td:nth-child(4),
+        .all-pastes th:nth-child(4) {
+            width: 30%;
+        }
+        .pinned-pastes td:nth-child(5),
+        .pinned-pastes th:nth-child(5),
+        .all-pastes td:nth-child(5),
+        .all-pastes th:nth-child(5) {
+            width: 25%;
+        }
+    }
+    .loading {
+        text-align: center;
+        padding: 20px;
+        color: #888888;
+        font-style: italic;
+    }
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+    }
+    .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .modal-content {
+        background-color: #111;
+        padding: 20px;
+        border: 1px solid #333;
+        width: 80%;
+        max-width: 500px;
+        position: relative;
+        color: #fff;
+    }
+    .modal-close {
+        color: #666;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .modal-close:hover {
+        color: #999;
+    }
+    input[type="checkbox"]:checked {
+        accent-color: #ff0000;
+    }
+
+    /* ADV BANNER */
+    @keyframes pulse{0%{outline-offset:0;opacity:1}100%{outline-offset:6px;opacity:.4}}
+    /*  */
+</style>
+<body>
+    <div class="logo-container">
+        <img id="logo-site" src="/static/vilebin_logo.jpg" alt="Vilebin Logo">
+    </div>
+
+    <div class="announcements">
+        {% for announcement in announcements | reverse %}
+        <div class="announcement" style="color: {{ announcement.color }}">
+            {{ announcement.text | safe }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="search-container">
+        <label class="search-label">Search for a paste</label>
+        {% if username %}
+        <div style="margin-bottom: 8px; font-size: 13px;">
+            <input type="radio" id="searchTitle" name="searchType" value="title" checked style="accent-color: #ff0000;" onchange="updateSearchOption('title')">
+            <label for="searchTitle" style="color: #888888;">Search in title</label><br>
+            <input type="radio" id="searchContent" name="searchType" value="content" style="accent-color: #ff0000;" onchange="updateSearchOption('content')">
+            <label for="searchContent" style="color: #888888;">Search in paste</label>
+        </div>
+        {% endif %}
+        
+        <form class="search-form" action="/searchp" method="GET">
+            <input name="search_query" type="text" class="search-box" placeholder="Search for...">
+            <input type="hidden" id="searchOption" name="search_option" value="title">
+            <button type="submit" class="search-button">Search</button>
+        </form>
+    </div>
+    
+    <div class="showing-text">
+        Showing 100 (of  total) pastes
+    </div>
+    
+    <div class="pagination">
+        <a href="javascript:void(0)" onclick="changePage(Math.max(1, currentPage - 1))">&lt;</a>
+        <a href="javascript:void(0)" class="active">1</a>
+        <a href="javascript:void(0)">2</a>
+        <a href="javascript:void(0)">3</a>
+        <a href="javascript:void(0)">4</a>
+        <a href="javascript:void(0)">5</a>
+        <a href="javascript:void(0)" onclick="changePage(Math.min(totalPages, currentPage + 1))">&gt;</a>
+    </div>
+
+    <!-- ADV BANNER -->
+    {#
+    <a href="https://t.me/GetMyTGrobot?start=ad-Racer21" target="_blank"><img src="/static/adv.jpg" loading="lazy" style="display:block;margin:40px auto;width:170px;border-radius:12px;outline:2px solid rgba(255,0,0,.7);outline-offset:0;animation:pulse 1.6s linear infinite;box-shadow:0 10px 25px rgba(0,0,0,.15);cursor:pointer"></a>
+    #}
+    <!--  -->
+
+    <div class="pinned-pastes">
+        <h2>Pinned Pastes</h2>
+        <table id="pinnedTable">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Comments</th>
+                    <th>Views</th>
+                    <th>Created by</th>
+                    <th>Added</th>
+                    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                    <th style="color: red;">Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for pinned_post in pinned_posts_list %}
+                <tr style="{% if pinned_post.delete %}background-color: #421414 {% else %}background-color: {{ styles.get(pinned_post.pastownerstatus, {}).get('backgroundColor', '') }};{% endif %}" data-rank-color="{{ styles.get(pinned_post.pastownerstatus, {}).get('backgroundColor', '') }}">
+                    <td>
+                        <a href="/upload/{{ pinned_post.name | replace(' ', '') }}" title="{{ pinned_post.name }}">
+                            {% if pinned_post.type == 'unlisted' %}
+                            <i class="fas fa-eye-slash visibility-icon"></i>
+                            {% endif %}
+                            {% if pinned_post.type == 'private' %}
+                            <i class="fas fa-shield-alt visibility-icon"></i>
+                            {% endif %}
+                            {{ pinned_post.name }}
+                        </a>
+                    </td>
+                    <td>{{ pinned_post.comments }}</td>
+                    <td>{{ pinned_post.view }}</td>
+                    <td>
+                        {% set s = styles.get(pinned_post.pastownerstatus, styles['user']) %}
+                        {% if pinned_post.pastownerstatus == 'anonymous' %}
+                            <span style="color: {{ pinned_post.pastownercolor }};">{{ pinned_post.pastowner }}</span>
+                        {% else %}
+                            <a href="/user/{{ pinned_post.pastowner }}" style="{{ s.rankStyle }}">
+                                <span style="color: {{ pinned_post.pastownercolor }};">{{ pinned_post.pastowner }}</span>
+                                {% if s.suffix %} {{ s.suffix }}{% endif %}
+                            </a>
+                        {% endif %}
+                    </td>
+                    <td>{{ pinned_post.formatted_date }}</td>
+                    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                    <td>
+                        {% if not pinned_post.delete %}
+                        <a href="javascript:void(0)" style="color: red; font-weight: bold;" onclick="showHideModal('{{ pinned_post.id }}', this)">Seal</a>
+                        {% else %}
+                        <a href="javascript:void(0)" style="color: red; font-weight: bold;" onclick="unsealPaste('{{ pinned_post.id }}', this)">Unseal</a>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="all-pastes">
+        <table id="allPastesTable">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Comments</th>
+                    <th>Views</th>
+                    <th>Created by</th>
+                    <th>Added</th>
+                    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+                    <th style="color: red;">Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody id="allPastesBody">
+                <tr>
+                    <td colspan="5" class="loading">Loading pastes...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="pagination" id="bottomPagination"></div>
+    <div class="showing-text" id="bottomShowingText" style="margin-top: 0px !important; margin-bottom: 25px !important; text-align: center !important;"></div>
+
+    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+    <div id="hideModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeHideModal()">&times;</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px;">Seal Paste</h2>
+            <div id="hideModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <select id="hide-dropdown" style="background: #282828; border: 0; border-radius: 2px; display: inline-block; -webkit-font-smoothing: antialiased; outline: none; padding: 7px 5px; width: 100%; color: white; margin-bottom: 10px; font-size: inherit; font-family: inherit;" onchange="updateReasonInput()">
+                    <option value="" selected></option>
+                    <option value="Insufficient info - Read TOS">Insufficient</option>
+                    <option value="Contains info on a minor under 15 - Read TOS">Underage</option>
+                    <option value="Spam - Read TOS">Spam / Irrelevant</option>
+                    <option value="Threats - Read TOS">Threats</option>
+                    <option value="Contains explicit imagery of a minor. Do not reupload.">CP</option>
+                    <option value="Contains a lack of information. Please provide more information.">Lack of effort</option>
+                    <option value="Bot Output">Bot Output</option>
+                </select>
+                <textarea id="hide-reason" placeholder="Reason" style="width: calc(100% - 10px); background: #282828; border: 0; border-radius: 2px; color: white; padding: 7px 5px; margin-bottom: 10px; height: 60px; resize: none; outline: none; font-size: inherit; font-family: inherit;"></textarea>
+                <div style="margin-bottom: 15px;">
+                    <input type="checkbox" id="notifyUser" style="margin-right: 5px;" checked>
+                    <label for="notifyUser" style="font-size: inherit;">Notify user</label>
+                </div>
+                <button onclick="submitHideForm()" style="background: #222; color: #fff; border: 1px solid #333; padding: 8px 16px; border-radius: 3px; cursor: pointer; font-size: inherit; font-family: inherit;">Seal</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+    <div id="restoreModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeRestoreModal()">&times;</span>
+            <h2 style="margin-top: 0; margin-bottom: 20px;">Unseal Paste</h2>
+            <div id="restoreModalError" style="color: #ff0000; margin-bottom: 10px; display: none;"></div>
+            <div>
+                <select id="restore-dropdown" style="background: #282828; border: 0; border-radius: 2px; display: inline-block; -webkit-font-smoothing: antialiased; outline: none; padding: 7px 5px; width: 100%; color: white; margin-bottom: 10px; font-size: inherit; font-family: inherit;" onchange="updateRestoreReasonInput()">
+                    <option value="" selected></option>
+                    <option value="Mistakenly deleted">Mistakenly deleted</option>
+                    <option value="Restoring after review">Reviewed and approved</option>
+                    <option value="False report">False report</option>
+                </select>
+                <textarea id="restore-reason" placeholder="Reason" style="width: calc(100% - 10px); background: #282828; border: 0; border-radius: 2px; color: white; padding: 7px 5px; margin-bottom: 10px; height: 60px; resize: none; outline: none; font-size: inherit; font-family: inherit;"></textarea>
+                <div style="margin-bottom: 15px;">
+                    <input type="checkbox" id="notifyUserRestore" style="margin-right: 5px;" checked>
+                    <label for="notifyUserRestore" style="font-size: inherit;">Notify user</label>
+                </div>
+                <button onclick="submitRestoreForm()" style="background: #222; color: #fff; border: 1px solid #333; padding: 8px 16px; border-radius: 3px; cursor: pointer; font-size: inherit; font-family: inherit;">Unseal</button>
+            </div>
+        </div>
+    </div>    
+    {% endif %}
+    <script>
+        document.querySelectorAll('.timestamp').forEach(el => {
+            const timestamp = parseInt(el.dataset.time);
+            el.textContent = timestamp;
+        });
+
+        function truncateTitle(title) {
+            return title.length > 47 ? title.substring(0, 47) + '...' : title;
+        }
+
+        let currentPage = 1;
+        let currentSearch = '';
+        
+        async function fetchPastes(page = 1, search = '') {
+            try {
+                const tbody = document.getElementById('allPastesBody');
+                const bottomPagination = document.getElementById('bottomPagination');
+                const bottomShowingText = document.getElementById('bottomShowingText');
+                
+                bottomPagination.style.display = 'none';
+                bottomShowingText.style.display = 'none';
+                
+                const isAdmin = {% if status in ['admin', 'founder', 'manager', 'mod'] %}true{% else %}false{% endif %};
+                const colspan = isAdmin ? 6 : 5;
+                tbody.innerHTML = `<tr><td colspan="${colspan}" class="loading">Loading pastes...</td></tr>`;
+                
+                let url = `/api/fetchPastes?page=${page}`;
+                if (search) {
+                    url += `&search=${encodeURIComponent(search)}`;
+                    
+                    {% if username %}
+                    const searchType = document.querySelector('input[name="searchType"]:checked').value;
+                    url += `&searchType=${searchType}`;
+                    {% else %}
+                    url += '&searchType=title';
+                    {% endif %}
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.error === "Rate limit exceeded" && data.success === false) {
+                    tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align: center; color: #ff0000;">You are being rate limited.</td></tr>`;
+                    return;
+                }
+                
+                tbody.innerHTML = '';
+                
+                const paginationHtml = `
+                    <a href="javascript:void(0)" onclick="changePage(${Math.max(1, page - 1)})">&lt;</a>
+                    ${generatePaginationLinks(page, data.totalPages)}
+                    <a href="javascript:void(0)" onclick="changePage(${Math.min(data.totalPages, page + 1)})">&gt;</a>
+                `;
+                
+                document.querySelector('.pagination').innerHTML = paginationHtml;
+                bottomPagination.innerHTML = paginationHtml;
+                bottomPagination.style.display = 'inline-flex';
+                
+                const showingText = `Showing ${data.pastes.length} (of ${data.total} total) pastes`;
+                document.querySelector('.showing-text').textContent = showingText;
+                bottomShowingText.textContent = showingText;
+                bottomShowingText.style.display = 'block';
+                
+                data.pastes.forEach(paste => {
+                    const tr = document.createElement('tr');
+                    tr.setAttribute('data-paste-id', paste.id);
+                    tr.setAttribute('data-rank-color', paste.rankHighlightColor || '');
+                    if (paste.type === 'sealed') {
+                        tr.style.backgroundColor = '#421414';
+                    } else if (paste.rankHighlightColor) {
+                        tr.style.backgroundColor = paste.rankHighlightColor;
+                    }
+                    
+                    tr.innerHTML = `
+                        <td><a href="/upload/${paste.link}">
+                            ${paste.password ? '<i class="fas fa-lock" style="margin-right: 5px;"></i>' : 
+                             paste.type === 'private' ? '<i class="fas fa-shield-alt" style="margin-right: 5px;"></i>' : 
+                             paste.type === 'unlisted' ? '<i class="fas fa-eye-slash" style="margin-right: 5px;"></i>' : ''}
+                            ${paste.type === 'pinned' ? '<i class="fas fa-thumbtack" style="margin-right: 5px;"></i>' : ''}
+                            ${truncateTitle(paste.title)}</a></td>
+                        <td>${paste.comments}</td>
+                        <td>${paste.views}</td>
+                        <td>
+                            ${paste.author ? `
+                                <a href="/user/${paste.author}" ${paste.rankStyle ? `style="${paste.rankStyle}"` : 'style="color: #2A9FD6"'}>
+                                    <span ${paste.usernameColor ? `style="color: ${paste.usernameColor}"` : ''}>${paste.author}</span>
+                                    ${paste.rankSuffix ? paste.rankSuffix : ''}
+                                </a>
+                            ` : 'Anonymous'}
+                        </td>
+                        <td>${paste.created_at}</td>
+                        ${isAdmin ? 
+                            `<td style="color: #ff0000;">${paste.type === 'sealed' ? 
+                                `<a href="javascript:void(0)" style="color: #ff0000;" onclick="unsealPaste('${paste.id}', this)">Unseal</a>` :
+                                `<a href="javascript:void(0)" style="color: #ff0000;" onclick="showHideModal('${paste.id}', this)">Seal</a>`
+                            }</td>` : 
+                            ''
+                        }
+                    `;
+                    
+                    tbody.appendChild(tr);
+                });
+
+                document.querySelector('.showing-text').textContent = 
+                    `Showing ${data.pastes.length} (of ${data.total} total) pastes`;
+            } catch (error) {
+                console.error('Error fetching pastes:', error);
+            }
+        }
+
+        function generatePaginationLinks(current, total) {
+            let links = '';
+            let start = Math.max(1, current - 2);
+            let end = Math.min(total, start + 4);
+            
+            if (end - start < 4) {
+                start = Math.max(1, end - 4);
+            }
+            
+            for (let i = start; i <= end; i++) {
+                links += `<a href="javascript:void(0)" onclick="changePage(${i})" ${i === current ? 'class="active"' : ''}>${i}</a>`;
+            }
+            return links;
+        }
+
+        async function changePage(page) {
+            currentPage = page;
+            await fetchPastes(currentPage, currentSearch);
+        }
+
+        const searchForm = document.querySelector('.search-form');
+        const searchInput = document.querySelector('.search-box');
+
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            currentSearch = searchInput.value;
+            currentPage = 1;
+            await fetchPastes(currentPage, currentSearch);
+        });
+
+        fetchPastes();
+    </script>
+    <script>
+        function updateSearchOption(option) {
+            document.getElementById('searchOption').value = option;
+        }
+    </script>
+    {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+    <script>
+        function showHideModal(pasteId, element) {
+            currentPasteId = pasteId;
+            currentRow = element.closest('tr');
+            const modal = document.getElementById('hideModal');
+            modal.classList.add('show');
+            document.getElementById('hide-dropdown').value = '';
+            document.getElementById('hide-reason').value = '';
+            document.getElementById('notifyUser').checked = true;
+            document.getElementById('hideModalError').style.display = 'none';
+        }
+
+        function closeHideModal() {
+            const modal = document.getElementById('hideModal');
+            modal.classList.remove('show');
+            currentPasteId = null;
+            currentRow = null;
+            document.getElementById('hideModalError').style.display = 'none';
+        }
+
+        function updateReasonInput() {
+            const select = document.getElementById('hide-dropdown');
+            const input = document.getElementById('hide-reason');
+            input.value = select.value;
+        }
+
+        async function submitHideForm() {
+            const errorDiv = document.getElementById('hideModalError');
+            errorDiv.style.display = 'none';
+
+            const reason = document.getElementById('hide-reason').value.trim();
+
+            if (!reason.length) {
+                errorDiv.textContent = 'Input reason.';
+                errorDiv.style.display = 'block';
+                return
+            }
+
+            const notify = document.getElementById('notifyUser').checked;
+
+            let url = `/api/managePasteType?action=seal&pasteID=${currentPasteId}`;
+            if (reason) {
+                url += `&reason=${encodeURIComponent(reason)}`;
+            }
+            url += `&notify=${notify}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    currentRow.style.backgroundColor = '#421414';
+                    const actionCell = currentRow.querySelector('td:last-child');
+                    actionCell.innerHTML = `<a href="javascript:void(0)" style="color: red; font-weight: bold;" onclick="unsealPaste('${currentPasteId}', this)">Unseal</a>`;
+                    closeHideModal();
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to delete paste';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = 'An error occurred while deleting the paste';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal1 = document.getElementById('hideModal');
+            const modal2 = document.getElementById('restoreModal');
+            if (event.target === modal1 || event.target === modal2) {
+                closeHideModal();
+                closeRestoreModal();
+            }
+        };
+        {% endif %}
+
+        {% if status in ['admin', 'founder', 'manager', 'mod'] %}
+        function unsealPaste(pasteId, element) {
+            currentPasteId = pasteId;
+            currentRow = element.closest('tr');
+            const modal = document.getElementById('restoreModal');
+            modal.classList.add('show');
+            document.getElementById('restore-dropdown').value = '';
+            document.getElementById('restore-reason').value = '';
+            document.getElementById('notifyUserRestore').checked = true;
+            document.getElementById('restoreModalError').style.display = 'none';
+        }
+
+        function closeRestoreModal() {
+            const modal = document.getElementById('restoreModal');
+            modal.classList.remove('show');
+            currentPasteId = null;
+            currentRow = null;
+            document.getElementById('restoreModalError').style.display = 'none';
+        }
+        
+        function updateRestoreReasonInput() {
+            const select = document.getElementById('restore-dropdown');
+            const input = document.getElementById('restore-reason');
+            input.value = select.value;
+        }
+
+        async function submitRestoreForm() {
+            const errorDiv = document.getElementById('restoreModalError');
+            errorDiv.style.display = 'none';
+
+            const reason = document.getElementById('restore-reason').value.trim();
+
+            if (!reason.length) {
+                errorDiv.textContent = 'Input reason.';
+                errorDiv.style.display = 'block';
+                return
+            }
+
+            const notify = document.getElementById('notifyUserRestore').checked;
+
+            let url = `/api/managePasteType?action=unseal&pasteID=${currentPasteId}`;
+            if (reason) {
+                url += `&reason=${encodeURIComponent(reason)}`;
+            }
+            url += `&notify=${notify}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    const rankColor = currentRow.getAttribute('data-rank-color') || '';
+                    currentRow.style.backgroundColor = rankColor;
+                    const actionCell = currentRow.querySelector('td:last-child');
+                    actionCell.innerHTML = `<a href="javascript:void(0)" style="color: red; font-weight: bold;" onclick="showHideModal('${currentPasteId}', this)">Seal</a>`;
+                    closeRestoreModal();
+                } else {
+                    errorDiv.textContent = data.error || 'Failed to restore paste';
+                    errorDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                errorDiv.textContent = 'An error occurred while restoring the paste';
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+    {% endif %}
+</body>
+</html>
+{% endblock %}

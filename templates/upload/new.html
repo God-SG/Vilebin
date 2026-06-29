@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>Upload | Vilebin</title>
+
+    <link rel="stylesheet" href="/static/nav.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+</head>
+<body class="bin">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .upload-container {
+            display: flex;
+            height: 100vh;
+        }
+        .text-area {
+            flex: 1;
+            background: #0C0C0C;
+            position: relative;
+        }
+        .text-area textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: monospace;
+            font-size: 13px;
+            resize: none;
+            padding: 10px 20px;
+            margin: 0;
+            margin-top: 10px;
+            white-space: pre;
+            tab-size: 4;
+            -moz-tab-size: 4;
+            word-wrap: break-word;
+        }
+        .text-area textarea:focus {
+            outline: none;
+        }
+        .sidebar {
+            width: 280px;
+            background: #181818;
+            padding: 10px 12px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            transition: transform 0.3s ease;
+            text-align: center;
+        }
+        .sidebar.hidden {
+            transform: translateX(100%);
+        }
+        .toggle-sidebar {
+            position: fixed;
+            right: 304px;
+            top: 0;
+            background: #181818;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1000;
+            padding: 6px 10px;
+            border-radius: 0;
+            transition: right 0.3s ease;
+        }
+        .toggle-sidebar:hover {
+            background: #222;
+        }
+        .ascii-art {
+            color: #fff;
+            font-family: monospace;
+            white-space: pre;
+            font-size: 14px;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .form-group label {
+            display: block;
+            color: #fff;
+            margin-bottom: 5px;
+            font-size: 13px;
+            text-align: center;
+        }
+        .username-field {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+        .username-field a {
+            color: #888;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .username-field a:hover {
+            text-decoration: underline;
+        }
+        .username-field span {
+            color: #fff;
+            font-size: 13px;
+        }
+        .form-group input[type="text"],
+        .form-group input[type="password"] {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            padding: 8px 12px;
+            color: #fff;
+            font-size: 13px;
+            border-radius: 3px;
+        }
+        .form-group input::placeholder {
+            color: #bfbfbf;
+        }
+        .form-group input[type="text"]:focus,
+        .form-group input[type="password"]:focus {
+            outline: none;
+        }
+        .form-group small {
+            display: block;
+            color: #888;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        .notify-followers {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 0 2px;
+        }
+        .notify-followers label {
+            color: #fff;
+            font-size: 13px;
+            margin-bottom: 0;
+        }
+        .visibility-options {
+            margin: 15px 0;
+            color: #fff;
+        }
+        .visibility-options label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        .visibility-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 4px;
+            padding: 0 2px;
+        }
+        .visibility-option label {
+            margin-bottom: 0;
+            font-size: 13px;
+        }
+        input[type="radio"], 
+        input[type="checkbox"] {
+            margin: 0;
+        }
+        .button {
+            width: 100%;
+            background: #545454;
+            border: 1px solid #282828;
+            color: #fff;
+            padding: 8px 0;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 3px;
+            margin-bottom: 0;
+            transition: all 0.2s;
+        }
+        .button:hover {
+            background: #666;
+        }
+        .tos-note {
+            color: #fff;
+            font-size: 13px;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .tos-note a {
+            color: #888;
+            text-decoration: none;
+        }
+        .tos-note a:hover {
+            text-decoration: underline;
+        }
+        .separator {
+            border-top: 2px solid #747474;
+            margin: 15px 0;
+        }
+        *:focus {
+            outline: none !important;
+        }
+        input[type="radio"]:checked,
+        input[type="checkbox"]:checked {
+            accent-color: #ff0000;
+        }
+        .cf-turnstile {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .sidebar a {
+            color: #888;
+            text-decoration: none;
+        }
+        .sidebar a:hover {
+            text-decoration: underline;
+        }
+        .error-message {
+            color: #ff0000;
+            margin: 10px 0;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        input {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        *:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        input, textarea, select {
+            font-size: 16px !important;
+        }
+
+        @keyframes breathe {
+            0% { background: rgba(255, 215, 0, 0.05); }
+            50% { background: rgba(255, 215, 0, 0.15); }
+            100% { background: rgba(255, 215, 0, 0.05); }
+        }
+        .premium-upgrade {
+            animation: breathe 2s ease-in-out infinite;
+            transition: all 0.3s ease;
+            text-decoration: none !important;
+        }
+        .premium-upgrade:hover {
+            background: rgba(255, 215, 0, 0.2) !important;
+            text-decoration: none !important;
+        }
+
+        /* NEW YEAR */
+        .snowflake {
+            user-select: none !important;
+            pointer-events: none !important;
+        }
+    </style>
+    <div class="upload-container">
+        <div class="text-area">
+            <textarea name="content" id="paste-content" maxlength="500000" spellcheck="false"></textarea>
+        </div>
+    
+        <button class="toggle-sidebar">☰</button>
+
+        <div class="sidebar" id="sidebar">
+            <a href="/" style="text-decoration: none;"><div class="ascii-art" style="text-decoration: none; font-size: 13px; line-height: 1.1;">__      ___ _      _     _       
+\ \    / (_) |    | |   (_)      
+ \ \  / / _| | ___| |__  _ _ __  
+  \ \/ / | | |/ _ \ '_ \| | '_ \ 
+   \  /  | | |  __/ |_) | | | | |
+    \/   |_|_|\___|_.__/|_|_| |_|</div></a>
+
+            <div class="form-group username-field">
+                {% if username %}
+                    {% set s = styles.get(status, styles['user']) %}
+                    {% if userstatus == 'anonymous' %}
+                        <span style="float: right;">{{ username }}</span>
+                    {% else %}
+                        <a href="/user/{{ username }}" style="{{ s.rankStyle }}">
+                            {% if color %}
+                                <span style="color: {{ color }};">{{ username }}</span>
+                            {% else %}
+                                {{ username }}
+                            {% endif %}
+                            {% if s.suffix %} {{ s.suffix }}{% endif %}
+                        </a>
+                    {% endif %}
+                    <a href="/logout">(Logout)</a>
+                {% else %}
+                    <span><a href="/login">Login</a> or <a href="/register">register</a> to manage your pastes.</span>
+                {% endif %}
+            </div>
+
+            {% if status in ['anonymous', 'user'] %}
+            <div style="display: flex; flex-direction: column; align-items: center; margin: 15px 0;">
+                <a href="/upgrades" class="premium-upgrade" style="color: #FFD700; padding: 6px 12px; font-weight: bold; display: flex; align-items: center;" target="_blank">
+                    <span style="color: #FFD700;">⭐</span>
+                    Unlock Premium Features
+                </a>
+            </div>
+            {% endif %}
+
+            <div class="error-message" id="error">{{ error }}</div>
+            <form id="uploadForm" onsubmit="submitPaste(event)">
+                <div class="form-group">
+                    <label><strong>Title:</strong></label>
+                    <input type="text" id="paste-title" maxlength="34" name="title" placeholder="Paste title (no special chars)" pattern="[A-Za-z0-9 ]+" oninput="this.value = this.value.replace(/[^A-Za-z0-9 ]/g, '');">
+                </div>
+                
+                {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich', 'criminal'] %}
+
+                {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich'] %}
+                    <div class="separator"></div>
+
+                    <div class="form-group">
+                        <label><strong>Paste Password:</strong></label>
+                        <input type="password" name="password" placeholder="Password...">
+                        <small>Option to make paste viewable only by people with the password</small>
+                    </div>
+                {% endif %}
+
+                <div class="separator"></div>
+                    
+                <div class="visibility-options">
+                    <label><strong>Paste Visibility</strong></label>
+                    <div class="visibility-option">
+                        <label for="public"><strong>Public</strong></label>
+                        <input type="radio" name="visibility" id="public" value="public" checked>
+                    </div>
+                    <div class="visibility-option">
+                        <label for="unlisted"><strong>Unlisted</strong></label>
+                        <input type="radio" name="visibility" id="unlisted" value="unlisted">
+                    </div>
+                    <div class="visibility-option">
+                        <label for="private"><strong>Private</strong></label>
+                        <input type="radio" name="visibility" id="private" value="private">
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="separator"></div>
+
+                <div class="cf-turnstile" data-theme="dark" data-sitekey="0x4AAAAAAC3WTrckRnu_OvfY"></div>
+
+                <div class="separator"></div>
+
+                <button type="submit" class="button">Create</button>
+                <button type="button" onclick="clearFields()" class="button">Clear</button>
+
+                <div class="separator"></div>
+
+                <div class="tos-note">
+                    Please note that all posted information is publicly available and must follow our <a href="/tos">TOS</a>.
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function submitPaste(e) {
+            e.preventDefault();
+
+            const title = document.querySelector('input[name="title"]').value;
+            const content = document.querySelector('textarea[name="content"]').value;
+            {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich'] %}
+            const password = document.querySelector('input[name="password"]')?.value.trim() || '';
+            {% endif %}
+            const errorDiv = document.querySelector('.error-message');
+
+            let visibility = 'public';
+            const visibilityInputs = document.querySelectorAll('input[name="visibility"]');
+            if (visibilityInputs.length > 0) {
+                for (const input of visibilityInputs) {
+                    if (input.checked) {
+                        visibility = input.value;
+                        break;
+                    }
+                }
+            }
+
+            const captchaResponse = turnstile.getResponse();
+            if (!captchaResponse) {
+                errorDiv.textContent = "Captcha verification failed.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("content", content);
+            formData.append("cf-recaptcha-response", captchaResponse);
+            formData.append("type", visibility);
+            {% if status in ['admin', 'founder', 'manager', 'mod', 'council', 'clique', 'rich'] %}
+            if (password) {
+                formData.append("password", password);
+            }
+            {% else %}
+            formData.append("password", '');
+            {% endif %}
+
+            try {
+                const response = await fetch(`/api/uploadPaste?title=${encodeURIComponent(title)}`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    errorDiv.textContent = data.error || "An error occurred while creating the paste";
+                    if (data.error && data.error.includes("captcha")) {
+                        turnstile.reset();
+                    }
+                    return;
+                }
+
+                if (data.redirect) {
+                    window.location.href = data.redirect;
+                } else {
+                    errorDiv.textContent = "An error occurred while creating the paste";
+                }
+            } catch (err) {
+                console.error("Fetch error:", err);
+                errorDiv.textContent = "An error occurred while creating the paste";
+                turnstile.reset();
+            }
+        }
+
+        const toggleButton = document.querySelector('.toggle-sidebar');
+        const sidebar = document.querySelector('.sidebar');
+        
+        toggleButton.addEventListener('click', function() {
+            sidebar.classList.toggle('hidden');
+            if (sidebar.classList.contains('hidden')) {
+                toggleButton.style.right = '0';
+            } else {
+                toggleButton.style.right = '304px';
+            }
+        });
+
+        document.querySelector('.text-area textarea').addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                
+                var start = this.selectionStart;
+                var end = this.selectionEnd;
+                
+                this.value = this.value.substring(0, start) + '\t' + this.value.substring(end);
+                
+                this.selectionStart = this.selectionEnd = start + 1;
+            }
+        });
+
+        function clearFields() {
+            if (confirm("Are you sure you want to clear all fields?")) {
+                document.getElementById('paste-content').value = '';
+                document.getElementById('paste-title').value = '';
+            }
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            let textarea = document.getElementById("paste-content");
+            let domain = window.location.origin;
+            let tosUrl = domain + "/tos";
+            textarea.placeholder = `READ OUR TERMS OF SERVICE BEFORE CREATING A POST. Pastes that break TOS will be removed. ${tosUrl}\nREAD OUR TERMS OF SERVICE BEFORE CREATING A POST. Pastes that break TOS will be removed. ${tosUrl}\nREAD OUR TERMS OF SERVICE BEFORE CREATING A POST. Pastes that break TOS will be removed. ${tosUrl}`;
+        });
+    </script>
+</body>
+</html>
